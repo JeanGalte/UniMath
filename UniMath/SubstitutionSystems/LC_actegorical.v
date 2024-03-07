@@ -121,11 +121,13 @@ Section IndAndCoind.
   Definition LC_eta_gen : sortToSet2⟦Id,LC_gen⟧ := SigmaMonoid_η θLC σ.
 
   (** the algebra maps (the "domain-specific constructors") for monotyped LC *)
-  Definition STLC_tau_gen : LC_Functor_H LC_gen --> LC_gen  := SigmaMonoid_τ θLC σ.
+  Definition LC_tau_gen : LC_Functor_H LC_gen --> LC_gen  := SigmaMonoid_τ θLC σ.
 
   (** the individual sorted constructors for application and lambda-abstraction *)
 
   (**
+     On ne se préoccupe pas du "oldstyle".
+
   Definition app_source_gen_oldstyle_abstracted (s : sort) : functor sortToSet2 sortToSet2 :=
     (post_comp_functor (projSortToC sort Hsort HSET s) ⊗ post_comp_functor (projSortToC sort Hsort HSET s))
       ∙ (post_comp_functor (hat_functor sort Hsort HSET CoproductsHSET s)).
@@ -146,19 +148,21 @@ Section IndAndCoind.
       (functor_compose (functor_compose Id LC_gen)
          (projSortToC sort Hsort SET s ∙ hat_functor sort Hsort SET CoproductsHSET s)).
 
-  Definition app_source_gen (s t : sort) : sortToSet2 :=
+Definition app_source_gen (s : sort) : sortToSet2 :=
     ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort SET TerminalHSET
-      BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort STLC_Sig (inl (s,, t))) STLC_gen.
+      BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort LC_Sig (inl s)) LC_gen.
 
-  Lemma app_source_gen_ok (s t : sort) : app_source_gen s t  = app_source_gen_newstyle s t.
+  Lemma app_source_gen_ok (s : sort) : app_source_gen s  = app_source_gen_newstyle s.
   Proof.
     apply idpath.
   Qed.
 
   (** The application constructor *)
-  Definition app_map_gen (s t : sort) : sortToSet2⟦app_source_gen s t,STLC_gen⟧ :=
-    CoproductIn _ _ (Coproducts_functor_precat _ _ _ _ (λ _, _)) (ii1 (s,,t)) · STLC_tau_gen.
+  Definition app_map_gen (s : sort) : sortToSet2⟦app_source_gen s ,LC_gen⟧ :=
+    CoproductIn _ _ (Coproducts_functor_precat _ _ _ _ (λ _, _)) (ii1 s) · LC_tau_gen.
 
+(**
+On ne se préoccupe pas du "oldstyle"
   Definition lam_source_gen_oldstyle_abstracted (s t : sort) : functor sortToSet2 sortToSet2 :=
     pre_comp_functor (sorted_option_functor sort Hsort HSET TerminalHSET BinCoproductsHSET CoproductsHSET s)
       ∙ post_comp_functor (projSortToC sort Hsort SET t)
@@ -170,6 +174,8 @@ Section IndAndCoind.
   Proof.
     apply idpath.
   Qed.
+
+ **)
 
   Definition lam_source_gen_newstyle (s t : sort) : sortToSet2 :=
     functor_compose
