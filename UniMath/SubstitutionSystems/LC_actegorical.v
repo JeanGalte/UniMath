@@ -48,7 +48,7 @@ Local Open Scope cat.
 
 Section A.
 
-  Context (sort : hSet) (arr : sort → sort → sort).
+  Context (sort : hSet).
 
   Local Lemma Hsort : isofhlevel 3 sort.
   Proof.
@@ -179,15 +179,15 @@ Traité jusqu'ici : la suite est une copie de STLC_actegorical
     Definition ChurchZero_gen (ξ : sortToHSET) : LC_gen_ctx_sort ξ s.
     Proof.
       (** abstract a first variable - forced to be of type [s ⇒ s] *)
-      refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
+      refine (pr1 (pr1 (lam_map_gen _) _) _ _).
       exists (idpath _).
-      change (STLC_gen_ctx_sort (ctx_ext ξ (s ⇒ s)) (s ⇒ s)).
+      change (LC_gen_ctx_sort (ctx_ext ξ s) s).
       (** abstract a second variable - forced to be of type [s] *)
-      refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
+      refine (pr1 (pr1 (lam_map_gen _ ) _) _ _).
       exists (idpath _).
-      change (STLC_gen_ctx_sort (ctx_ext (ctx_ext ξ (s ⇒ s)) s) s).
+      change (LC_gen_ctx_sort (ctx_ext (ctx_ext ξ s) s) s).
       (** take a variable *)
-      simple refine (pr1 (pr1 STLC_eta_gen _) _ _).
+      simple refine (pr1 (pr1 LC_eta_gen _) _ _).
       cbn.
       (** the available variables are seen, pick the last added variable of type [s] *)
       apply ii1.
@@ -195,25 +195,25 @@ Traité jusqu'ici : la suite est une copie de STLC_actegorical
       exact tt.
     Defined.
 
-    Definition ChurchOne_gen (ξ : sortToHSET) : STLC_gen_ctx_sort ξ ((s ⇒ s) ⇒ (s ⇒ s)).
+    Definition ChurchOne_gen (ξ : sortToHSET) : LC_gen_ctx_sort ξ s.
     Proof.
-      refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
+      refine (pr1 (pr1 (lam_map_gen _ ) _) _ _).
       exists (idpath _).
-      refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
+      refine (pr1 (pr1 (lam_map_gen _ ) _) _ _).
       exists (idpath _).
       (** do an application with argument type [s] - not giving this argument would slow down the further steps *)
-      refine (pr1 (pr1 (app_map_gen s _) _) _ _).
+      refine (pr1 (pr1 (app_map_gen s ) _) _ _).
       split; exists (idpath _).
-      - change (STLC_gen_ctx_sort (ctx_ext (ctx_ext ξ (s ⇒ s)) s) (s ⇒ s)).
-        simple refine (pr1 (pr1 STLC_eta_gen _) _ _).
+      - change (LC_gen_ctx_sort (ctx_ext (ctx_ext ξ s) s) s).
+        simple refine (pr1 (pr1 LC_eta_gen _) _ _).
         cbn.
         (** the available variables are seen, pick the first added variable of type [s ⇒ s] *)
         apply ii2.
         apply ii1.
         exists (idpath _).
         exact tt.
-      - change (STLC_gen_ctx_sort (ctx_ext (ctx_ext ξ (s ⇒ s)) s) s).
-        simple refine (pr1 (pr1 STLC_eta_gen _) _ _).
+      - change (LC_gen_ctx_sort (ctx_ext (ctx_ext ξ s) s) s).
+        simple refine (pr1 (pr1 LC_eta_gen _) _ _).
         cbn.
         (** pick the last added variable of type [s] *)
         apply ii1.
@@ -221,23 +221,23 @@ Traité jusqu'ici : la suite est une copie de STLC_actegorical
         exact tt.
     Defined.
 
-    Definition Church_gen (n : nat) (ξ : sortToHSET) : STLC_gen_ctx_sort ξ ((s ⇒ s) ⇒ (s ⇒ s)).
+    Definition Church_gen (n : nat) (ξ : sortToHSET) : LC_gen_ctx_sort ξ s.
     Proof.
-      refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
+      refine (pr1 (pr1 (lam_map_gen _) _) _ _).
       exists (idpath _).
-      refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
+      refine (pr1 (pr1 (lam_map_gen _ ) _) _ _).
       exists (idpath _).
-      change (STLC_gen_ctx_sort (ctx_ext (ctx_ext ξ (s ⇒ s)) s) s).
+      change (LC_gen_ctx_sort (ctx_ext (ctx_ext ξ s) s) s).
       induction n.
-      - simple refine (pr1 (pr1 STLC_eta_gen _) _ _).
+      - simple refine (pr1 (pr1 LC_eta_gen _) _ _).
         cbn.
         apply ii1.
         exists (idpath _).
         exact tt.
-      - refine (pr1 (pr1 (app_map_gen s _) _) _ _).
+      - refine (pr1 (pr1 (app_map_gen s) _) _ _).
         split; exists (idpath _).
-        + change (STLC_gen_ctx_sort (ctx_ext (ctx_ext ξ (s ⇒ s)) s) (s ⇒ s)).
-          simple refine (pr1 (pr1 STLC_eta_gen _) _ _).
+        + change (LC_gen_ctx_sort (ctx_ext (ctx_ext ξ s) s) s).
+          simple refine (pr1 (pr1 LC_eta_gen _) _ _).
           cbn.
           apply ii2.
           apply ii1.
@@ -250,58 +250,58 @@ Traité jusqu'ici : la suite est une copie de STLC_actegorical
 
 End IndAndCoind.
 
-Definition STLC_ctx_sort_ind (ξ : sortToHSET) (s : sort) : UU
-  := STLC_gen_ctx_sort σind ξ s.
-Definition STLC_ctx_sort_coind (ξ : sortToHSET) (s : sort) : UU
-  := STLC_gen_ctx_sort σcoind ξ s.
+Definition LC_ctx_sort_ind (ξ : sortToHSET) (s : sort) : UU
+  := LC_gen_ctx_sort σind ξ s.
+Definition LC_ctx_sort_coind (ξ : sortToHSET) (s : sort) : UU
+  := LC_gen_ctx_sort σcoind ξ s.
 
-Definition STLC_ind : sortToSet2 := STLC_gen σind.
-Definition STLC_coind : sortToSet2 := STLC_gen σcoind.
+Definition LC_ind : sortToSet2 := LC_gen σind.
+Definition LC_coind : sortToSet2 := LC_gen σcoind.
 
-Definition STLC_eta_ind : sortToSet2⟦Id,STLC_ind⟧ := STLC_eta_gen σind.
-Definition STLC_eta_coind : sortToSet2⟦Id,STLC_coind⟧ := STLC_eta_gen σcoind.
+Definition LC_eta_ind : sortToSet2⟦Id,LC_ind⟧ := LC_eta_gen σind.
+Definition LC_eta_coind : sortToSet2⟦Id,LC_coind⟧ := LC_eta_gen σcoind.
 
-Definition STLC_tau_ind : STLC_Functor_H STLC_ind --> STLC_ind  := SigmaMonoid_τ θSTLC σind.
-Definition STLC_tau_coind : STLC_Functor_H STLC_coind --> STLC_coind  := SigmaMonoid_τ θSTLC σcoind.
+Definition LC_tau_ind : LC_Functor_H LC_ind --> LC_ind  := SigmaMonoid_τ θLC σind.
+Definition LC_tau_coind : LC_Functor_H LC_coind --> LC_coind  := SigmaMonoid_τ θLC σcoind.
 
-Definition app_source_ind (s t : sort) : sortToSet2 := app_source_gen σind s t.
-Definition app_map_ind (s t : sort) : sortToSet2⟦app_source_ind s t,STLC_ind⟧ := app_map_gen σind s t.
-Definition lam_source_ind (s t : sort) : sortToSet2 := lam_source_gen σind s t.
-Definition lam_map_ind (s t : sort) : sortToSet2⟦lam_source_ind s t,STLC_ind⟧ := lam_map_gen σind s t.
+Definition app_source_ind (s : sort) : sortToSet2 := app_source_gen σind s.
+Definition app_map_ind (s : sort) : sortToSet2⟦app_source_ind s ,LC_ind⟧ := app_map_gen σind s.
+Definition lam_source_ind (s : sort) : sortToSet2 := lam_source_gen σind s.
+Definition lam_map_ind (s : sort) : sortToSet2⟦lam_source_ind s,LC_ind⟧ := lam_map_gen σind s.
 
-Definition app_source_coind (s t : sort) : sortToSet2 := app_source_gen σcoind s t.
-Definition app_map_coind (s t : sort) : sortToSet2⟦app_source_coind s t,STLC_coind⟧ := app_map_gen σcoind s t.
-Definition lam_source_coind (s t : sort) : sortToSet2 := lam_source_gen σcoind s t.
-Definition lam_map_coind (s t : sort) : sortToSet2⟦lam_source_coind s t,STLC_coind⟧ := lam_map_gen σcoind s t.
+Definition app_source_coind (s : sort) : sortToSet2 := app_source_gen σcoind s.
+Definition app_map_coind (s : sort) : sortToSet2⟦app_source_coind s ,LC_coind⟧ := app_map_gen σcoind s.
+Definition lam_source_coind (s : sort) : sortToSet2 := lam_source_gen σcoind s.
+Definition lam_map_coind (s : sort) : sortToSet2⟦lam_source_coind s ,LC_coind⟧ := lam_map_gen σcoind s.
 
 
 (** get a handle on the recursion principles *)
 
 (** the initial algebra *)
-Definition STLC_ind_IA : Initial (FunctorAlg STLC_Functor_Id_H)
+Definition LC_ind_IA : Initial (FunctorAlg LC_Functor_Id_H)
   := DatatypeOfMultisortedBindingSig_CAT sort Hsort SET TerminalHSET InitialHSET BinProductsHSET
        BinCoproductsHSET ProductsHSET CoproductsHSET (expSortToHSET1 sort Hsort)
-       (ColimsHSET_of_shape nat_graph) STLC_Sig.
+       (ColimsHSET_of_shape nat_graph) LC_Sig.
 (** notice that this is only the initial algebra and not the initial sigma monoid *)
 
 (** the final coalgebra *)
-Definition STLC_coind_FC : Terminal (CoAlg_category STLC_Functor_Id_H)
+Definition LC_coind_FC : Terminal (CoAlg_category LC_Functor_Id_H)
   := coindCodatatypeOfMultisortedBindingSig_CAT sort Hsort HSET TerminalHSET
          BinProductsHSET BinCoproductsHSET CoproductsHSET (LimsHSET_of_shape conat_graph)
-         I_coproduct_distribute_over_omega_limits_HSET STLC_Sig is_univalent_HSET.
+         I_coproduct_distribute_over_omega_limits_HSET LC_Sig is_univalent_HSET.
 
 Section Church.
 
   (** fix a sort, viewed as an atom *)
   Context (s : sort).
 
-  Definition ChurchInfinity (ξ : sortToHSET) : STLC_ctx_sort_coind ξ ((s ⇒ s) ⇒ (s ⇒ s)).
+  Definition ChurchInfinity (ξ : sortToHSET) : LC_ctx_sort_coind ξ s.
     Proof.
-      refine (pr1 (pr1 (lam_map_coind _ _) _) _ _).
+      refine (pr1 (pr1 (lam_map_coind _ ) _) _ _).
       exists (idpath _).
-      refine (pr1 (pr1 (lam_map_coind _ _) _) _ _).
+      refine (pr1 (pr1 (lam_map_coind _) _) _ _).
       exists (idpath _).
-      change (STLC_ctx_sort_coind (ctx_ext (ctx_ext ξ (s ⇒ s)) s) s).
+      change (LC_ctx_sort_coind (ctx_ext (ctx_ext ξ s) s) s).
       (* TODO: coinduction has to come into play *)
     Abort.
 
