@@ -49,7 +49,7 @@ Local Open Scope cat.
 Section A.
 
   Context (sort : hSet) (arr : sort → sort → sort).
-  
+
   Local Lemma Hsort : isofhlevel 3 sort.
   Proof.
     exact (isofhlevelssnset 1 sort (setproperty sort)).
@@ -138,19 +138,19 @@ Section IndAndCoind.
   Qed.
 
    **)
-  
+
   Definition app_source_gen_newstyle (s : sort) : sortToSet2 :=
     BinProduct_of_functors BPsortToHSET
       (functor_compose (functor_compose Id LC_gen)
          (projSortToC sort Hsort SET s ∙ hat_functor sort Hsort SET CoproductsHSET s))
       (functor_compose (functor_compose Id LC_gen)
          (projSortToC sort Hsort SET s ∙ hat_functor sort Hsort SET CoproductsHSET s)).
-  
-Definition app_source_gen (s : sort) : sortToSet2.
-  ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort SET TerminalHSET
-      BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort LC_Sig (inl (s,,s))) LC_gen.
 
-  Lemma app_source_gen_ok (s : sort) : app_source_gen s  = app_source_gen_newstyle s.
+  Definition app_source_gen (s t : sort) : sortToSet2 :=
+    ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort SET TerminalHSET
+      BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort STLC_Sig (inl (s,, t))) STLC_gen.
+
+  Lemma app_source_gen_ok (s t : sort) : app_source_gen s t  = app_source_gen_newstyle s t.
   Proof.
     apply idpath.
   Qed.
