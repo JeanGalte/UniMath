@@ -164,13 +164,6 @@ Definition app_source_gen (s : sort) : sortToSet2 :=
     CoproductIn _ _ (Coproducts_functor_precat _ _ _ _ (λ _, _)) (ii2 s) · LC_tau_gen.
 
 
-(**
-
-Traité jusqu'ici : la suite est une copie de STLC_actegorical
-
- **)
-
-
   Section Church.
 
     (** fix a sort, viewed as an atom *)
@@ -302,8 +295,13 @@ Section Church.
       refine (pr1 (pr1 (lam_map_coind _) _) _ _).
       exists (idpath _).
       change (LC_ctx_sort_coind (ctx_ext (ctx_ext ξ s) s) s).
+      refine (pr1 (pr1 (app_map_coind _ ) _) _ _).
+      split.
+
       (* TODO: coinduction has to come into play *)
     Abort.
+
+
 
 End Church.
 
