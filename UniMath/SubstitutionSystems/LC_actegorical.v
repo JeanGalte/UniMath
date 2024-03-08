@@ -34,6 +34,7 @@ Require Import UniMath.CategoryTheory.Categories.HSET.Colimits.
 Require Import UniMath.CategoryTheory.Categories.HSET.Limits.
 Require Import UniMath.CategoryTheory.Categories.HSET.Structures.
 Require Import UniMath.CategoryTheory.Categories.HSET.Univalence.
+Require Import UniMath.CategoryTheory.Limits.Terminal.
 Require Import UniMath.SubstitutionSystems.SigmaMonoids.
 Require Import UniMath.SubstitutionSystems.MultiSorted_alt.
 Require Import UniMath.SubstitutionSystems.MultiSorted_actegorical.
@@ -113,9 +114,12 @@ Section IndAndCoind.
   (** the functor representing the syntax for STLC *)
   Definition LC_gen : sortToSet2 := SigmaMonoid_carrier θLC σ.
 
+  (** the functor associated to lambda calculus terms without the context of a sort**)
+  Definition LC_gen_ctx (ξ : sortToHSET) : sortToHSET := pr1 LC_gen ξ.
+
   (** the type of monotyped lambda calculus terms in a context of a sort *)
   Definition LC_gen_ctx_sort (ξ : sortToHSET) (s : sort) : UU
-    := pr1 (pr1 (pr1 LC_gen ξ) s).
+    := pr1 (pr1 (LC_gen_ctx ξ) s).
 
   (** variable inclusion for syntax for monotyped LC *)
   Definition LC_eta_gen : sortToSet2⟦Id,LC_gen⟧ := SigmaMonoid_η θLC σ.
@@ -200,7 +204,7 @@ Definition app_source_gen (s : sort) : sortToSet2 :=
       - change (LC_gen_ctx_sort (ctx_ext (ctx_ext ξ s) s) s).
         simple refine (pr1 (pr1 LC_eta_gen _) _ _).
         cbn.
-        (** the available variables are seen, pick the first added variable of type [s ⇒ s] *)
+        (** the available variables are seen, pick the first added variable of type s *)
         apply ii2.
         apply ii1.
         exists (idpath _).
@@ -239,9 +243,33 @@ Definition app_source_gen (s : sort) : sortToSet2 :=
         + exact IHn.
     Defined.
 
-
-
   End Church.
+
+  Section Church_functor.
+
+    Definition terminal_sortToSet : Terminal sortToHSET := Terminal_functor_precat _ _  TerminalHSET.
+
+    (** Terminal object of sortToSet2 herited from sortToSet. sortToSet's terminal object is not hard to build**)
+    Definition terminal_sortToSet2 : Terminal sortToSet2 := Terminal_functor_precat sortToHSET sortToHSET terminal_sortToSet.
+
+    Definition Church_gen_sortToHSET (n : nat) : sortToSet2⟦terminal_sortToSet2, LC_gen⟧.
+    Proof.
+      use make_nat_trans.
+      - intros ξ.
+        use nat_trans_functor_path_pregroupoid.
+        intros s. intros _.
+        change (LC_gen_ctx_sort ξ s).
+        exact (Church_gen s n ξ).
+      - red. intros ξ ξ' f. apply nat_trans_eq.
+        + apply HSET.
+        + intros s. apply funextfun.
+          intros one. cbn in one. induction one.
+          simpl. unfold identity. simpl. unfold compose. simpl. induction n.
+          * change (ChurchZero_gen s ξ' = # LC_gen f s (ChurchZero_gen s ξ)).
+
+
+  End Church_functor.
+
 
 End IndAndCoind.
 
