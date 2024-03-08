@@ -171,7 +171,7 @@ Definition app_source_gen (s : sort) : sortToSet2 :=
 
     Definition ChurchZero_gen (ξ : sortToHSET) : LC_gen_ctx_sort ξ s.
     Proof.
-      (** abstract a first variable - forced to be of type [s ⇒ s] *)
+      (** abstract a first variable - forced to be of type s *)
       refine (pr1 (pr1 (lam_map_gen _) _) _ _).
       exists (idpath _).
       change (LC_gen_ctx_sort (ctx_ext ξ s) s).
@@ -238,6 +238,8 @@ Definition app_source_gen (s : sort) : sortToSet2 :=
           exact tt.
         + exact IHn.
     Defined.
+
+
 
   End Church.
 
