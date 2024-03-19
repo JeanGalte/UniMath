@@ -41,7 +41,7 @@ Require Import UniMath.SubstitutionSystems.MultiSortedMonadConstruction_actegori
 Require Import UniMath.SubstitutionSystems.MultiSortedMonadConstruction_coind_actegorical.
 Require Import UniMath.SubstitutionSystems.ContinuitySignature.InstantiateHSET.
 Require Import UniMath.SubstitutionSystems.MultiSortedEmbeddingIndCoindHSET.
-Require UniMath.SubstitutionSystems.LC_alt.
+Require Import UniMath.SubstitutionSystems.STLC_alt.
 
 
 Local Open Scope cat.
