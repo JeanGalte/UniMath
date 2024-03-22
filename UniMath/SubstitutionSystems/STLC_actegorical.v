@@ -3,7 +3,7 @@
 Syntax of the simply typed lambda calculus as a
 multisorted signature.
 
-Written by: Ralph Matthes, 2024 (adapted from STLC_alt.v)
+Written by: Ralph Matthes, 2024 (reusing beginnings from STLC_alt.v)
 
  *)
 Require Import UniMath.Foundations.PartD.
@@ -464,7 +464,6 @@ Section IndAndCoind.
       - apply nat_trans_eq; try apply HSET.
         intros s. apply funextfun.
         intros one. cbn in one. induction one.
-        unfold nat_trans_functor_path_pregroupoid.
         etrans.
         2: { apply pathsinv0, (STLC_eta_gen_natural'_ppointwise _ _
                                  (# (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s)
@@ -485,7 +484,7 @@ Section IndAndCoind.
         clear aux therhs.
         assert (IHnpointwise : pr1 (# (pr1 Church_gen_body_target) f) s (Church_gen_body s n ξ) =
                                  Church_gen_body s n ξ').
-        apply (toforallpaths _ _ _ (toforallpaths _ _ _ (maponpaths pr1 IHn) s) tt).
+        { apply (toforallpaths _ _ _ (toforallpaths _ _ _ (maponpaths pr1 IHn) s) tt). }
         rewrite <- IHnpointwise.
         clear IHnpointwise.
         unfold Church_gen_body_target.
@@ -787,18 +786,36 @@ Definition STLC_coind_FC : Terminal (CoAlg_category STLC_Functor_Id_H)
 
 Section Church.
 
-  (** fix a sort, viewed as an atom *)
-  Context (s : sort).
+  Definition ChurchInfinity_body_sortToHSET : global_element terminal_sortToSet2 (Church_gen_body_target σcoind).
+  Proof.
+    (** has to use [STLC_coind_FC] in the right way *)
+  Admitted.
 
-  Definition ChurchInfinity (ξ : sortToHSET) : STLC_ctx_sort_coind ξ ((s ⇒ s) ⇒ (s ⇒ s)).
-    Proof.
-      refine (pr1 (pr1 (lam_map_coind _ _) _) _ _).
-      exists (idpath _).
-      refine (pr1 (pr1 (lam_map_coind _ _) _) _ _).
-      exists (idpath _).
-      change (STLC_ctx_sort_coind (ctx_ext (ctx_ext ξ (s ⇒ s)) s) s).
-      (* TODO: coinduction has to come into play *)
-    Abort.
+  Definition ChurchInfinity_body (ξ : sortToHSET) (s: sort) : STLC_gen_ctx_sort σcoind (ctx_ext (ctx_ext ξ (s ⇒ s)) s) s.
+  Proof.
+    exact (pr1 ((pr1 ChurchInfinity_body_sortToHSET) ξ) s tt).
+  Defined.
+
+  Definition ChurchInfinity_body_sortToHSET_rec_eq_statement (ξ : sortToHSET) (s : sort) : UU :=
+    ChurchInfinity_body ξ s =
+      pr1 (pr1 (app_map_coind s s) (ctx_ext (ctx_ext ξ (s ⇒ s)) s)) s
+        ((idpath s,,
+            pr1 (pr1 STLC_eta_coind (ctx_ext (ctx_ext ξ (s ⇒ s)) s)) (s ⇒ s)
+            (inr (inl (idpath (s ⇒ s),, tt)) : pr1 (pr1 (Id (ctx_ext (ctx_ext ξ (s ⇒ s)) s)) (s ⇒ s)))),,
+           idpath s,, ChurchInfinity_body ξ s).
+
+  Lemma ChurchInfinity_body_sortToHSET_rec_eq (ξ : sortToHSET) (s : sort) : ChurchInfinity_body_sortToHSET_rec_eq_statement ξ s.
+  Proof.
+  Admitted.
+
+  Definition ChurchInfinity_sortToHSET : global_element terminal_sortToSet2
+           (functor_compose STLC_coind (projSortToCvariable sort Hsort HSET (fun s => (s ⇒ s) ⇒ (s ⇒ s))))
+      := ChurchInfinity_body_sortToHSET · (Church_gen_header_sortToHSET σcoind).
+
+  Definition ChurchInfinity (s : sort) (ξ : sortToHSET) : STLC_ctx_sort_coind ξ ((s ⇒ s) ⇒ (s ⇒ s)).
+  Proof.
+    exact (pr1 ((pr1 ChurchInfinity_sortToHSET) ξ) s tt).
+  Defined.
 
 End Church.
 
