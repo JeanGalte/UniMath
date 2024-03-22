@@ -55,8 +55,7 @@ Section A.
 
   Let BPsortToHSET : BinProducts sortToHSET := BinProducts_functor_precat _ _ BinProductsHSET.
   Let BCsortToHSET : BinCoproducts sortToHSET := BinCoproducts_functor_precat _ _ BinCoproductsHSET.
-
-  Let terminal_sortToHSET : Terminal sortToHSET := Terminal_functor_precat _ _ TerminalHSET.
+Let terminal_sortToHSET : Terminal sortToHSET := Terminal_functor_precat _ _ TerminalHSET.
 
 
   Local Lemma BinProd : BinProducts [sortToHSET,HSET].
@@ -71,7 +70,9 @@ Local Notation "'Id'" := (functor_identity _).
 (*Local Notation "a ⊕ b" := (BinCoproductObject (BinCoprodSortToSet a b)). *)
 (* Local Notation "'1'" := (TerminalObject TerminalSortToSet). *)
 Local Notation "F ⊗ G" := (BinProduct_of_functors BinProd F G).
+
 Let sortToSet2 := [sortToHSET,sortToHSET].
+
 Let terminal_sortToSet2 : Terminal sortToSet2 := Terminal_functor_precat sortToHSET sortToHSET terminal_sortToHSET.
 
 Lemma postcomp_with_projSortToC_on_mor (F : sortToSet2) (s: sort) (ξ ξ' : sortToHSET) (f : sortToHSET ⟦ ξ, ξ' ⟧)
@@ -157,25 +158,64 @@ Definition app_source_gen (s : sort) : sortToSet2 :=
   Proof.
     apply idpath.
   Qed.
+
+  Lemma app_source_gen_mor_pr1 (s : sort) (ξ ξ' : sortToHSET) (f : sortToHSET ⟦ ξ, ξ' ⟧)
+    (u : sort) (arg : pr1 (pr1 (pr1 (app_source_gen s) ξ) u)) :
+    pr1 (pr1 (# (pr1 (app_source_gen s)) f) u arg) =
+      pr1 (# (pr1 (functor_compose LC_gen
+                     (projSortToC sort Hsort SET s ∙ hat_functor sort Hsort SET CoproductsHSET s))) f) u (pr1 arg).
+  Proof.
+    apply idpath.
+  Qed.
+
+   Lemma app_source_gen_mor_pr2 (s : sort) (ξ ξ' : sortToHSET) (f : sortToHSET ⟦ ξ, ξ' ⟧)
+    (u : sort) (arg : pr1 (pr1 (pr1 (app_source_gen s) ξ) u)) :
+    pr2 (pr1 (# (pr1 (app_source_gen s)) f) u arg) =
+      pr1 (# (pr1 (functor_compose LC_gen
+                     (projSortToC sort Hsort SET s ∙ hat_functor sort Hsort SET CoproductsHSET s))) f) u (pr2 arg).
+  Proof.
+    apply idpath.
+  Qed.
+
   (** The application constructor *)
   Definition app_map_gen (s : sort) : sortToSet2⟦app_source_gen s ,LC_gen⟧ :=
     CoproductIn _ _ (Coproducts_functor_precat _ _ _ _ (λ _, _)) (ii1 s) · LC_tau_gen.
+
+  Definition app_map_gen_natural (s : sort) (ξ ξ' : sortToHSET) (f : sortToHSET ⟦ ξ, ξ' ⟧)
+    : # (pr1 (app_source_gen s)) f · pr1 (app_map_gen s) ξ' = pr1 (app_map_gen s) ξ · # (pr1 LC_gen) f
+    := nat_trans_ax (app_map_gen s) ξ ξ' f.
+
+  Lemma app_map_gen_natural_pointwise (s : sort) (ξ ξ' : sortToHSET) (f : sortToHSET ⟦ ξ, ξ' ⟧) (u : sort)
+    : pr1 (# (pr1 (app_source_gen s)) f) u · pr1 (pr1 (app_map_gen s) ξ') u =
+        pr1 (pr1 (app_map_gen s) ξ) u · pr1 (# (pr1 LC_gen) f) u.
+  Proof.
+    apply (nat_trans_eq_weq HSET _ _ (app_map_gen_natural s ξ ξ' f)).
+  Qed.
+
+  Lemma app_map_gen_natural_ppointwise (s : sort) (ξ ξ' : sortToHSET) (f : sortToHSET ⟦ ξ, ξ' ⟧)
+    (u : sort) (elem : pr1 (pr1 (pr1 (app_source_gen s) ξ) u)) :
+    pr1 (pr1 (app_map_gen s) ξ') u (pr1 (# (pr1 (app_source_gen s)) f) u elem) =
+      pr1 (# (pr1 LC_gen) f) u (pr1 (pr1 (app_map_gen s) ξ) u elem).
+  Proof.
+    apply (toforallpaths _ _ _ (app_map_gen_natural_pointwise s ξ ξ' f u)).
+  Qed.
+
   Definition lam_source_gen_newstyle (s : sort) : sortToSet2 :=
     functor_compose
       (functor_compose
          (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s)
          LC_gen)
       (projSortToC sort Hsort SET s ∙ hat_functor sort Hsort SET CoproductsHSET s).
+
   Definition lam_source_gen (s : sort) : sortToSet2 :=
     ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort SET TerminalHSET
       BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort LC_Sig (inr s)) LC_gen.
+
   Lemma lam_source_gen_ok (s : sort) : lam_source_gen s = lam_source_gen_newstyle s.
   Proof.
     apply idpath.
   Qed.
- (**  lambda-abstraction constructor *)
-  Definition lam_map_gen (s : sort) : sortToSet2⟦lam_source_gen s ,LC_gen⟧ :=
-    CoproductIn _ _ (Coproducts_functor_precat _ _ _ _ (λ _, _)) (ii2 s) · LC_tau_gen.
+
   Lemma lam_source_gen_mor_pr2 (s : sort) (ξ ξ' : sortToHSET) (f : sortToHSET ⟦ ξ, ξ' ⟧)
     (u : sort) (pr : pr1 (pr1 (pr1 (lam_source_gen s) ξ) u))
     : pr2 (pr1 (# (pr1 (lam_source_gen s)) f) u pr) =
@@ -187,6 +227,10 @@ Definition app_source_gen (s : sort) : sortToSet2 :=
   Proof.
     apply idpath.
   Qed.
+
+ (**  lambda-abstraction constructor *)
+  Definition lam_map_gen (s : sort) : sortToSet2⟦lam_source_gen s ,LC_gen⟧ :=
+    CoproductIn _ _ (Coproducts_functor_precat _ _ _ _ (λ _, _)) (ii2 s) · LC_tau_gen.
 
    Definition lam_map_gen_natural (s : sort) (ξ ξ' : sortToHSET) (f : sortToHSET ⟦ ξ, ξ' ⟧)
     : # (pr1 (lam_source_gen s)) f · pr1 (lam_map_gen s) ξ' = pr1 (lam_map_gen s) ξ · # (pr1 LC_gen) f
@@ -228,6 +272,7 @@ Definition app_source_gen (s : sort) : sortToSet2 :=
       exists (idpath _).
       exact tt.
     Defined.
+
     Definition ChurchOne_gen (ξ : sortToHSET) : LC_gen_ctx_sort ξ s.
     Proof.
       refine (pr1 (pr1 (lam_map_gen _ ) _) _ _).
@@ -254,13 +299,8 @@ Definition app_source_gen (s : sort) : sortToSet2 :=
         exact tt.
     Defined.
 
-    Definition Church_gen (n : nat) (ξ : sortToHSET) : LC_gen_ctx_sort ξ s.
+    Definition Church_gen_body (n : nat) (ξ : sortToHSET) : LC_gen_ctx_sort (ctx_ext (ctx_ext ξ s) s) s.
     Proof.
-      refine (pr1 (pr1 (lam_map_gen _) _) _ _).
-      exists (idpath _).
-      refine (pr1 (pr1 (lam_map_gen _ ) _) _ _).
-      exists (idpath _).
-      change (LC_gen_ctx_sort (ctx_ext (ctx_ext ξ s) s) s).
       induction n.
       - simple refine (pr1 (pr1 LC_eta_gen _) _ _).
         cbn.
@@ -279,24 +319,275 @@ Definition app_source_gen (s : sort) : sortToSet2 :=
         + exact IHn.
     Defined.
 
+    Lemma Church_gen_body_rec_eq (n : nat) (ξ : sortToHSET) :
+      Church_gen_body (S n) ξ =
+        pr1 (pr1 (app_map_gen s) (ctx_ext (ctx_ext ξ s) s)) s
+     ((idpath s,,
+       pr1 (pr1 LC_eta_gen (ctx_ext (ctx_ext ξ s) s)) s
+         (inr (inl (idpath s,, tt)) : pr1 (pr1 (Id (ctx_ext (ctx_ext ξ s) s)) s))),,
+        idpath s,, Church_gen_body n ξ).
+    Proof.
+      apply idpath.
+    Qed.
+
+    Definition Church_gen_header (ξ : sortToHSET) :
+      LC_gen_ctx_sort (ctx_ext (ctx_ext ξ s) s) s -> LC_gen_ctx_sort ξ s.
+    Proof.
+      intro body.
+      refine (pr1 (pr1 (lam_map_gen _) _) _ _).
+      exists (idpath _).
+      refine (pr1 (pr1 (lam_map_gen _) _) _ _).
+      exists (idpath _).
+      exact body.
+    Defined.
+
+    Definition Church_gen (n : nat) (ξ : sortToHSET) : LC_gen_ctx_sort ξ s
+       := Church_gen_header ξ (Church_gen_body n ξ).
+
   End Church.
 
   Section Church_functor.
 
-        Definition Church_gen_sortToHSET (n : nat) : global_element terminal_sortToSet2 (functor_compose LC_gen (projSortToCvariable sort Hsort HSET (fun s => s))).
+   Definition Church_gen_body_target_data: functor_data sortToHSET sortToHSET.
     Proof.
-      use make_global_element_functor_precat.
+      use make_functor_data.
       - intro ξ.
-        use nat_trans_functor_path_pregroupoid.
-        intros s _.
-        change (LC_gen_ctx_sort ξ s).
-        exact (Church_gen s n ξ).
-      - intros ξ ξ' f. apply nat_trans_eq; try apply HSET.
+        apply (functor_path_pregroupoid Hsort).
+        intro s.
+        exact (pr1 (pr1 LC_gen (ctx_ext (ctx_ext ξ s) s)) s).
+        (** this is the pointwise formula - with context and sort argument *)
+      - intros ξ ξ' f.
+        apply nat_trans_functor_path_pregroupoid.
+        intro s.
+        simpl.
+        exact (pr1 (# (pr1 LC_gen)
+                      (# (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s)
+                         (# (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s) f))) s).
+    Defined.
+
+    Lemma Church_gen_body_target_data_ok : is_functor Church_gen_body_target_data.
+    Proof.
+      split; red.
+      - intro ξ.
+        apply nat_trans_eq; try apply HSET.
+        intro s.
+        apply funextfun.
+        intro elem.
+        unfold functor_on_morphisms.
+        unfold Church_gen_body_target_data.
+        unfold pr2.
+        unfold make_functor_data.
+        unfold nat_trans_functor_path_pregroupoid.
+        unfold make_nat_trans.
+        unfold nat_trans_data_from_nat_trans_funclass.
+        unfold pr1.
+        do 2 rewrite functor_id.
+        rewrite (functor_id LC_gen).
+        apply idpath.
+      - intros ξ1 ξ2 ξ3 f g.
+        apply nat_trans_eq; try apply HSET.
+        intro s.
+        apply funextfun.
+        intro elem.
+        unfold functor_on_morphisms.
+        unfold Church_gen_body_target_data.
+        unfold make_functor_data.
+        unfold nat_trans_functor_path_pregroupoid.
+        unfold make_nat_trans.
+        unfold pr2.
+        unfold nat_trans_data_from_nat_trans_funclass.
+        unfold pr1.
+        do 2 rewrite functor_comp.
+        rewrite (functor_comp LC_gen).
+        apply idpath.
+    Qed.
+
+    Definition Church_gen_body_target : sortToSet2 := _,, Church_gen_body_target_data_ok.
+
+    Definition Church_gen_body_sortToHSET_data (n : nat) (ξ : sortToHSET) : global_element terminal_sortToHSET (pr1 Church_gen_body_target ξ).
+    Proof.
+      use nat_trans_functor_path_pregroupoid.
+      intros s _.
+      exact (Church_gen_body s n ξ).
+    Defined.
+
+    Lemma Church_gen_body_sortToHSET_data_ok (n : nat) (ξ ξ' : sortToHSET) (f : sortToHSET ⟦ ξ, ξ' ⟧) :
+      Church_gen_body_sortToHSET_data n ξ · # (pr1 Church_gen_body_target) f = Church_gen_body_sortToHSET_data n ξ'.
+    Proof.
+      induction n.
+      - apply nat_trans_eq; try apply HSET.
         intros s. apply funextfun.
         intros one. cbn in one. induction one.
-        simpl. unfold compose. simpl. induction n.
-        + change (pr1 (# (pr1 LC_gen) f) s (ChurchZero_gen s ξ) = ChurchZero_gen s ξ').
-          unfold ChurchZero_gen.
+        etrans.
+        2: { apply pathsinv0, (LC_eta_gen_natural'_ppointwise _ _
+                                 (# (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s)
+                                    (# (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s) f))
+                                 s (inl (idpath s,, tt))). }
+        apply idpath.
+      - apply nat_trans_eq; try apply HSET.
+        intros s. apply funextfun.
+        intros one. cbn in one. induction one.
+        set (aux := (λ (s0 : path_pregroupoid sort Hsort) (_ : pr1 (pr1 (pr1 terminal_sortToHSET) s0)),
+                      Church_gen_body s0 (S n) ξ) : ∏ x : path_pregroupoid sort Hsort,
+                   SET ⟦ pr1 (pr1 terminal_sortToHSET) x, pr1 (pr1 Church_gen_body_target ξ) x ⟧).
+        match goal with |[ |- _ = ?rhs] => set (therhs := rhs) end.
+        change (pr1 (# (pr1 Church_gen_body_target) f) s (aux s tt) = therhs).
+        change (pr1 (# (pr1 Church_gen_body_target) f) s (Church_gen_body s (S n) ξ) =
+                  Church_gen_body s (S n) ξ').
+        do 2 rewrite Church_gen_body_rec_eq.
+        clear aux therhs.
+        assert (IHnpointwise : pr1 (# (pr1 Church_gen_body_target) f) s (Church_gen_body s n ξ) =
+                                 Church_gen_body s n ξ').
+        { apply (toforallpaths _ _ _ (toforallpaths _ _ _ (maponpaths pr1 IHn) s) tt). }
+        rewrite <- IHnpointwise.
+        clear IHnpointwise.
+        unfold Church_gen_body_target.
+        unfold pr1.
+        unfold Church_gen_body_target_data.
+        unfold make_functor_data.
+        unfold functor_on_morphisms at 4.
+        unfold pr2.
+        unfold nat_trans_functor_path_pregroupoid.
+        unfold make_nat_trans.
+        apply pathsinv0.
+        unfold functor_on_morphisms at 7.
+        unfold pr2.
+        apply pathsinv0.
+        (** now begins the naturality reasoning *)
+        etrans.
+        match goal with |[ |- _ ?arg = _] => set (thearg := arg) end.
+        use (maponpaths (fun x : sortToHSET
+                                 ⟦ pr1 LC_gen
+                                     (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s
+                                        (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s  ξ)),
+                                   pr1 LC_gen
+                                     (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s
+                                        (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s ξ')) ⟧
+                         => pr1 x s thearg)).
+        2: { apply functor_composite_on_morphisms. }
+        rewrite <- app_map_gen_natural_ppointwise.
+        apply maponpaths.
+        use dirprodeq; [unfold pr1 | unfold pr2].
+        + rewrite app_source_gen_mor_pr1.
+          unfold pr1.
+          use dirprodeq.
+          * apply idpath.
+          * unfold pr2.
+            etrans.
+            2: { apply pathsinv0, (LC_eta_gen_natural'_ppointwise _ _
+                                     (# (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s)
+                                        (# (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s) f))
+                                     s (inr (inl (idpath s,, tt)))). }
+            apply idpath.
+        + apply app_source_gen_mor_pr2.
+    Qed.
+
+    Definition Church_gen_body_sortToHSET (n : nat) : global_element terminal_sortToSet2 Church_gen_body_target.
+    Proof.
+      use make_global_element_functor_precat.
+      - exact (Church_gen_body_sortToHSET_data n).
+      - exact (Church_gen_body_sortToHSET_data_ok n).
+    Defined.
+
+    Definition Church_gen_header_sortToHSET_data : nat_trans_data (pr1 Church_gen_body_target)
+            (pr1 (functor_compose LC_gen (projSortToCvariable sort Hsort SET (λ s : sort, s)))).
+    Proof.
+      intro ξ.
+      use nat_trans_functor_path_pregroupoid.
+      intros s body.
+      exact (Church_gen_header s ξ body).
+    Defined.
+
+    Lemma Church_gen_header_sortToHSET_data_ok : is_nat_trans _ _ Church_gen_header_sortToHSET_data.
+      intros ξ ξ' f.
+      apply nat_trans_eq; try apply HSET.
+      intros s. apply funextfun.
+      intro body.
+      simpl. unfold compose. simpl.
+      (** the following for better readability *)
+      match goal with |[ |- Church_gen_header s ξ' (pr1 (# (pr1 LC_gen) ?uglyxi ) s body)= _] => set (theuglyxi := uglyxi) end.
+      unfold Church_gen_header.
+      rewrite <- lam_map_gen_natural_ppointwise.
+      apply maponpaths.
+      use dirprodeq.
+      - apply idpath.
+      - unfold pr2.
+        etrans.
+        2: { apply pathsinv0, lam_source_gen_mor_pr2. }
+        unfold pr2.
+        etrans.
+        2: { apply pathsinv0, postcomp_with_projSortToC_on_mor. }
+        unfold functor_compose.
+        etrans.
+        2: { match goal with |[ |- _= _ ?arg ] => set (thearg := arg) end.
+             use (maponpaths (fun x :
+               sortToHSET ⟦ pr1 (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s ∙ LC_gen) ξ,
+                            pr1 (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s ∙ LC_gen) ξ' ⟧
+                              =>  pr1 x s thearg)).
+             2: { apply pathsinv0, functor_composite_on_morphisms. }
+        }
+        etrans.
+        2: { apply lam_map_gen_natural_ppointwise. }
+        apply maponpaths.
+        use dirprodeq.
+        + apply idpath.
+        + unfold pr2.
+          etrans.
+          2: { apply pathsinv0, lam_source_gen_mor_pr2. }
+          apply idpath.
+    Qed.
+
+    Definition Church_gen_header_sortToHSET : sortToSet2⟦Church_gen_body_target,
+         functor_compose LC_gen (projSortToCvariable sort Hsort HSET (fun s => s))⟧
+      := _,, Church_gen_header_sortToHSET_data_ok.
+
+     Definition Church_gen_sortToHSET (n : nat) : global_element terminal_sortToSet2
+           (functor_compose LC_gen (projSortToCvariable sort Hsort HSET (fun s => s)))
+      := Church_gen_body_sortToHSET n · Church_gen_header_sortToHSET.
+
+
+     (** this makes superfluous the lengthy definitions below that are kept for comparison *)
+
+    Definition old_Church_gen_sortToHSET_data (n : nat) (ξ : sortToHSET):
+      global_element terminal_sortToHSET
+        (pr1 (functor_compose LC_gen
+           (projSortToCvariable sort Hsort SET (λ s : sort, s))) ξ).
+    Proof.
+      use nat_trans_functor_path_pregroupoid.
+      intros s _.
+      change (LC_gen_ctx_sort ξ s).
+      exact (Church_gen s n ξ).
+    Defined.
+
+
+    Lemma old_Church_gen_sortToHSET_data_ok (n : nat) (ξ ξ' : sortToHSET) (f : sortToHSET ⟦ ξ, ξ' ⟧):
+      old_Church_gen_sortToHSET_data n ξ ·
+        # (pr1 (functor_compose LC_gen (projSortToCvariable sort Hsort SET (λ s : sort, s)))) f =
+        old_Church_gen_sortToHSET_data n ξ'.
+    Proof.
+      apply nat_trans_eq; try apply HSET.
+      intros s. apply funextfun.
+      intros one. cbn in one. induction one.
+      simpl. unfold compose. simpl. induction n.
+      - change (pr1 (# (pr1 LC_gen) f) s (ChurchZero_gen s ξ) = ChurchZero_gen s ξ').
+        unfold ChurchZero_gen.
+        rewrite <- lam_map_gen_natural_ppointwise.
+        apply maponpaths.
+        use dirprodeq.
+        + apply idpath.
+        + unfold pr2.
+          etrans.
+          { apply lam_source_gen_mor_pr2. }
+          unfold pr2.
+          etrans.
+          { apply postcomp_with_projSortToC_on_mor. }
+          unfold functor_compose.
+          etrans.
+          match goal with |[ |- _ ?arg = _] => set (thearg := arg) end.
+          use (maponpaths (fun x : sortToHSET ⟦ pr1 (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s ∙ LC_gen) ξ,
+                                     pr1 (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s ∙ LC_gen) ξ' ⟧
+                           =>  pr1 x s thearg)).
+          2: { apply functor_composite_on_morphisms. }
           etrans.
           { apply pathsinv0, lam_map_gen_natural_ppointwise. }
           apply maponpaths.
@@ -308,15 +599,44 @@ Definition app_source_gen (s : sort) : sortToSet2 :=
             unfold pr2.
             etrans.
             { apply postcomp_with_projSortToC_on_mor. }
-            unfold functor_compose.
             etrans.
-            use (maponpaths (fun x : sortToHSET ⟦ pr1 (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s ∙ LC_gen) ξ,
-                                       pr1 (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s ∙ LC_gen) ξ' ⟧
-                             => pr1 x s (pr1 (pr1 (lam_map_gen s) (ctx_ext ξ s)) s
-                                                (idpath s,, pr1 (pr1 LC_eta_gen (ctx_ext (ctx_ext ξ s) s)) s (inl (idpath s,, tt)))))).
+            match goal with |[ |- _ ?arg = _] => set (thearg := arg) end.
+            use (maponpaths (fun x : sortToHSET
+                                     ⟦ pr1 (functor_compose (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s) LC_gen)
+                                         (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s ξ),
+                                       pr1 (functor_compose (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s) LC_gen)
+                                         (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s ξ') ⟧
+                             => pr1 x s thearg)).
             2: { apply functor_composite_on_morphisms. }
             etrans.
-            { apply pathsinv0, lam_map_gen_natural_ppointwise. }
+            { apply pathsinv0, LC_eta_gen_natural'_ppointwise. }
+            apply maponpaths.
+            apply idpath.
+      - (** the successor case - this will not go through since there is the common prefix with the two lambda abstractions *)
+        induction n.
+        + change (pr1 (# (pr1 LC_gen) f) s (ChurchOne_gen s ξ) = ChurchOne_gen s ξ').
+          unfold ChurchOne_gen.
+          rewrite <- lam_map_gen_natural_ppointwise.
+          apply maponpaths.
+          use dirprodeq.
+          * apply idpath.
+          * unfold pr2.
+            etrans.
+            { apply lam_source_gen_mor_pr2. }
+            unfold pr2.
+            etrans.
+            { apply postcomp_with_projSortToC_on_mor. }
+            unfold functor_compose.
+            etrans.
+            match goal with |[ |- _ ?arg = _] => set (thearg := arg) end.
+            use (maponpaths (fun x : sortToHSET
+                                     ⟦ pr1 (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s ∙ LC_gen)
+                                         ξ,
+                                       pr1 (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s ∙ LC_gen) ξ'
+                                     ⟧
+                             => pr1 x s thearg)).
+            2: { apply functor_composite_on_morphisms. }
+            rewrite <- lam_map_gen_natural_ppointwise.
             apply maponpaths.
             use dirprodeq.
             -- apply idpath.
@@ -326,21 +646,53 @@ Definition app_source_gen (s : sort) : sortToSet2 :=
                unfold pr2.
                etrans.
                { apply postcomp_with_projSortToC_on_mor. }
+               unfold functor_compose.
                etrans.
+               match goal with |[ |- _ ?arg = _] => set (thearg := arg) end.
                use (maponpaths (fun x : sortToHSET
-       ⟦ pr1 (functor_compose (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s) LC_gen)
-           (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s ξ),
-       pr1 (functor_compose (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s) LC_gen)
-         (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s ξ') ⟧
-                                => pr1 x s (pr1 (pr1 LC_eta_gen (ctx_ext (ctx_ext ξ s) s)) s (inl (idpath s,, tt))))).
+                                        ⟦ pr1 (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s ∙ LC_gen)
+                                            (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s ξ),
+                                          pr1 (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s ∙ LC_gen)
+                                            (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s ξ') ⟧
+                                => pr1 x s thearg)).
                2: { apply functor_composite_on_morphisms. }
-               etrans.
-               { apply pathsinv0, LC_eta_gen_natural'_ppointwise. }
+               rewrite <- app_map_gen_natural_ppointwise.
                apply maponpaths.
-               apply idpath.
-        + (** the successor case - this will not go through since there is the common prefix with the two lambda abstractions *)
+               use dirprodeq; [unfold pr1 | unfold pr2].
+               ++ rewrite app_source_gen_mor_pr1.
+                  unfold pr1.
+                  use dirprodeq.
+                  --- apply idpath.
+                  --- unfold pr2.
+                      etrans.
+                      2: { apply pathsinv0, (LC_eta_gen_natural'_ppointwise _ _
+                                               (# (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s)
+                                                  (# (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s) f))
+                                               s (inr (inl (idpath s,, tt)))). }
+                      apply idpath.
+               ++ rewrite app_source_gen_mor_pr2.
+                  unfold pr2.
+                  use dirprodeq.
+                  --- apply idpath.
+                  --- unfold pr2.
+                      etrans.
+                      2: { apply pathsinv0, (LC_eta_gen_natural'_ppointwise _ _
+                                               (# (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s)
+                                                  (# (sorted_option_functor sort Hsort SET TerminalHSET BinCoproductsHSET CoproductsHSET s) f))
+                                               s (inl (idpath s,, tt))). }
+                      apply idpath.
+        + (** case of n>=2 *)
+          admit.
     Abort.
 
+(*    Definition old_Church_gen_sortToHSET (n : nat) : global_element terminal_sortToSet2
+                                                 (functor_compose STLC_gen (projSortToCvariable sort Hsort HSET (fun s => (s ⇒ s) ⇒ (s ⇒ s)))).
+    Proof.
+      use make_global_element_functor_precat.
+      - exact (old_Church_gen_sortToHSET_data n).
+      - exact (old_Church_gen_sortToHSET_data_ok n).
+    Defined.
+*)
 
   End Church_functor.
 
@@ -389,23 +741,37 @@ Definition LC_coind_FC : Terminal (CoAlg_category LC_Functor_Id_H)
 
 Section Church.
 
-  (** fix a sort, viewed as an atom *)
-  Context (s : sort).
 
-  Definition ChurchInfinity (ξ : sortToHSET) : LC_ctx_sort_coind ξ s.
-    Proof.
-      refine (pr1 (pr1 (lam_map_coind _ ) _) _ _).
-      exists (idpath _).
-      refine (pr1 (pr1 (lam_map_coind _) _) _ _).
-      exists (idpath _).
-      change (LC_ctx_sort_coind (ctx_ext (ctx_ext ξ s) s) s).
-      refine (pr1 (pr1 (app_map_coind _ ) _) _ _).
-      split.
+  Definition ChurchInfinity_body_sortToHSET : global_element terminal_sortToSet2 (Church_gen_body_target σcoind).
+  Proof.
+    (** has to use [STLC_coind_FC] in the right way *)
+  Admitted.
 
-      (* TODO: coinduction has to come into play *)
-    Abort.
+  Definition ChurchInfinity_body (ξ : sortToHSET) (s: sort) : LC_gen_ctx_sort σcoind (ctx_ext (ctx_ext ξ s) s) s.
+  Proof.
+    exact (pr1 ((pr1 ChurchInfinity_body_sortToHSET) ξ) s tt).
+  Defined.
 
+  Definition ChurchInfinity_body_sortToHSET_rec_eq_statement (ξ : sortToHSET) (s : sort) : UU :=
+    ChurchInfinity_body ξ s =
+      pr1 (pr1 (app_map_coind s) (ctx_ext (ctx_ext ξ s) s)) s
+        ((idpath s,,
+            pr1 (pr1 LC_eta_coind (ctx_ext (ctx_ext ξ s) s)) s
+            (inr (inl (idpath s,, tt)) : pr1 (pr1 (Id (ctx_ext (ctx_ext ξ s) s)) s))),,
+           idpath s,, ChurchInfinity_body ξ s).
 
+  Lemma ChurchInfinity_body_sortToHSET_rec_eq (ξ : sortToHSET) (s : sort) : ChurchInfinity_body_sortToHSET_rec_eq_statement ξ s.
+  Proof.
+  Admitted.
+
+  Definition ChurchInfinity_sortToHSET : global_element terminal_sortToSet2
+           (functor_compose LC_coind (projSortToCvariable sort Hsort HSET (fun s => s)))
+      := ChurchInfinity_body_sortToHSET · (Church_gen_header_sortToHSET σcoind).
+
+  Definition ChurchInfinity (s : sort) (ξ : sortToHSET) : LC_ctx_sort_coind ξ s.
+  Proof.
+    exact (pr1 ((pr1 ChurchInfinity_sortToHSET) ξ) s tt).
+  Defined.
 
 End Church.
 
