@@ -1,11 +1,10 @@
- (**
+(**
 
 Syntax of the mono typed lambda calculus as a
 multisorted signature.
 
-2024 (adapted from STLC_alt.v)
+2024 (adapted from STLC_actegorical), aiming to define an infinite for church numerals) **)
 
- *)
 Require Import UniMath.Foundations.PartD.
 Require Import UniMath.Foundations.Sets.
 
@@ -699,7 +698,7 @@ Definition app_source_gen (s : sort) : sortToSet2 :=
 
 End IndAndCoind.
 
-Definition LC_ctx_sort_ind (ξ : sortToHSET) (s : sort) : UU
+Definition LC_ctx_sort_ind (ξ : sortToHSET)  (s : sort) : UU
   := LC_gen_ctx_sort σind ξ s.
 Definition LC_ctx_sort_coind (ξ : sortToHSET) (s : sort) : UU
   := LC_gen_ctx_sort σcoind ξ s.
@@ -741,10 +740,58 @@ Definition LC_coind_FC : Terminal (CoAlg_category LC_Functor_Id_H)
 
 Section Church.
 
+(**
+Opération qu'on veut définir :
+"
+une opération plus générale
+parce que la cible pour une définition par coinduction doit être le
+foncteur qui représente les termes - et non pas avec des contextes
+contraintes. J'ai en tête une opération qui construit un terme de type s
+dans xi avec en entrée un terme pareil, et l'opération itère
+l'application à gauche sans cesse
+"
+On travaille au niveau du foncteur qui représente les termes coinductifs, donc ce doit être
+
+**)
+
+  Definition Infinite_coalg_rec :  sortToSet2⟦LC_coind, LC_Functor_Id_H LC_coind⟧ .
+  Proof.
+    use make_nat_trans.
+    -intro ξ.
+     use nat_trans_functor_path_pregroupoid.
+     intro s.
+     intro elem.
+     exact (LC_Functor_Id_H elem).
+
+
+
+(**
+On ne définit pas une algèbre mais :
+on utilise la terminalité de nu F
+Ifinite_iterate_coalg_rec
+on injecte elem via l'application sort s
+le couple (inr elem ,, inl elem)
+On prend le petit f (elem), on va dans la partie avec les bonnes injections et on donne l'argument (inr elem ,, inl elem)
+**)
+  Admitted.
+
+  Definition Iterate_infinite : sortToSet2⟦LC_coind,LC_coind⟧.
+  Proof.
+    exact (pr1 (TerminalArrow LC_coind_FC (LC_coind ,, Infinite_coalg_rec) )).
+  Defined.
+
 
   Definition ChurchInfinity_body_sortToHSET : global_element terminal_sortToSet2 (Church_gen_body_target σcoind).
   Proof.
-    (** has to use [STLC_coind_FC] in the right way *)
+    use make_global_element_functor_precat.
+    - intro ξ.
+      use nat_trans_functor_path_pregroupoid.
+      intros s _.
+      change  (pr1 (pr1 (pr1 LC_coind (ctx_ext (ctx_ext ξ s) s)) s)).
+      refine (pr1 (pr1 Iterate_infinite (ctx_ext (ctx_ext ξ s) s)) s _) .
+      refine (pr1 (pr1 LC_eta_coind (ctx_ext (ctx_ext ξ s) s)) s _).
+      exact (inr (inl (idpath s,, tt))).
+    - admit.
   Admitted.
 
   Definition ChurchInfinity_body (ξ : sortToHSET) (s: sort) : LC_gen_ctx_sort σcoind (ctx_ext (ctx_ext ξ s) s) s.
