@@ -147,6 +147,10 @@ Section HSET.
   Definition BPsortToSetSet : BinProducts sortToSetSet := BPsortToCC _ BinProductsHSET.
 
   Definition sortToSet2 : category := sortToC2 HSET.
+  (* Definition CCsortToSet2 : forall (I : UU), isaset I → Coproducts I sortToSet2 := CCsortToC2 HSET CoproductsHSET. *)
+  Definition BPsortToSet2 : BinProducts sortToSet2 := BPsortToC2 _ BinProductsHSET.
+  Definition TsortToSet2 : Terminal sortToSet2 := TsortToC2 _ TerminalHSET.
+
   Definition sortToSet3 : category := sortToC3 HSET.
 
 End HSET.
@@ -160,3 +164,12 @@ Notation sortToC3 sort Hsort C := ([sortToC2 sort Hsort C, sortToC2 sort Hsort C
 
 Notation CCsortToC sort Hsort C CC := (fun I isa => Coproducts_functor_precat I (path_pregroupoid sort Hsort) C (CC I isa)).
 Notation CCsortToC2 sort Hsort C CC := (fun I isa => Coproducts_functor_precat I _ _ (CCsortToC sort Hsort C CC I isa)).
+
+(*
+Lemma Hsort_from_hSet (sort : hSet) : isofhlevel 3 sort.
+Proof.
+  exact (isofhlevelssnset 1 sort (setproperty sort)).
+Qed.
+(* causes compilation errors downstream *)
+*)
+Notation Hsort_from_hSet sort := (isofhlevelssnset 1 sort (setproperty sort)).

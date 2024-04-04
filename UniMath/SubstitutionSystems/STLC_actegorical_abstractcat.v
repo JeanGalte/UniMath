@@ -8,7 +8,7 @@ The development is "point-free" in the sense that no assumption of well-pointedn
 Thanks to that actegorical development, the inductive and the coinductive calculus are exposed in parallel.
 The Church numerals are developed independently from the choice for inductive or coinductive syntax.
 
-There is also the construction (by primitive corecursion) of the Church numeral for infinity in the coinductive calculus, with a proof that it satisfied a proper recursive equation.
+There is also the construction (by primitive corecursion) of the Church numeral for infinity in the coinductive calculus, with a proof that it satisfies a proper recursive equation.
 
 Written by: Ralph Matthes, 2024 (generalized and expanded from STLC_actegorical.v)
 
@@ -61,7 +61,7 @@ Section A.
 
   Context (sort : hSet) (arr : sort → sort → sort).
 
-  Let Hsort : isofhlevel 3 sort := STLC_Hsort sort.
+  Let Hsort : isofhlevel 3 sort := MultiSortedBindingSig.STLC_Hsort sort.
 
   Local Definition STLC_Sig := STLC_Sig sort arr.
 
@@ -86,7 +86,9 @@ Section A.
 
   Let TsortToC : Terminal sortToC := SortIndexing.TsortToC sort Hsort _ TC.
 
-  Local Definition BPsortToCC : BinProducts [sortToC,C] := SortIndexing.BPsortToCC sort Hsort _ BP.
+  Let sortToCC : category := SortIndexing.sortToCC sort Hsort C.
+
+  Local Definition BPsortToCC : BinProducts sortToCC := SortIndexing.BPsortToCC sort Hsort _ BP.
 
   Local Definition CCsortToC : ∏ I : UU, isaset I → Coproducts I sortToC := SortIndexing.CCsortToC sort Hsort _ CC.
 
@@ -101,6 +103,10 @@ Local Notation "'Id'" := (functor_identity _).
 Local Notation "F ⊗ G" := (BinProduct_of_functors BPsortToCC F G).
 
 Let sortToC2 : category := SortIndexing.sortToC2 sort Hsort C.
+
+Let projSortToC : sort -> sortToCC := projSortToC sort Hsort C.
+Let hat_functorC : sort -> C ⟶ sortToC := hat_functor sort Hsort C CC.
+Let sorted_option_functorC : sort → sortToC2 := sorted_option_functor sort Hsort C TC BC CC.
 
 (*
 Local Lemma sortToC2_comp {F1 F2 F3 : sortToC2} (f : sortToC2⟦F1, F2⟧) (g : sortToC2⟦F2, F3⟧) (ξ : sortToC) :
@@ -133,8 +139,8 @@ Local Definition coproduct_of_functors_sortToC3_mor (I : UU) (isa : isaset I) (F
   := SortIndexing.coproduct_of_functors_sortToC3_mor sort Hsort C CC I isa F G G' α ξ s.
 
 Lemma postcomp_with_projSortToC_on_mor (F : sortToC2) (s: sort) (ξ ξ' : sortToC) (f : sortToC ⟦ ξ, ξ' ⟧)
-(* (arg : global_element TC (pr1 (functor_compose F (projSortToC sort Hsort C s)) ξ)) *)
-  : # (pr1 (functor_compose F (projSortToC sort Hsort C s))) f  = pr1 (# (pr1 F) f) s.
+(* (arg : global_element TC (pr1 (functor_compose F (projSortToC s)) ξ)) *)
+  : # (pr1 (functor_compose F (projSortToC s))) f  = pr1 (# (pr1 F) f) s.
 Proof.
   apply idpath.
 Qed.
@@ -214,15 +220,15 @@ Section IndAndCoind.
   (** the individual sorted constructors for application and lambda-abstraction *)
 
   Definition app_source_gen_oldstyle_abstracted (s t : sort) : functor sortToC2 sortToC2 :=
-    (post_comp_functor (projSortToC sort Hsort C (s ⇒ t)) ⊗ post_comp_functor (projSortToC sort Hsort C s))
-      ∙ (post_comp_functor (hat_functor sort Hsort C CC t)).
+    (post_comp_functor (projSortToC (s ⇒ t)) ⊗ post_comp_functor (projSortToC s))
+      ∙ (post_comp_functor (hat_functorC t)).
 
   Definition app_source_gen_newstyle (s t : sort) : sortToC2 :=
     BinProduct_of_functors BPsortToC
       (functor_compose STLC_gen
-         (projSortToC sort Hsort C (s ⇒ t) ∙ hat_functor sort Hsort C CC t))
+         (projSortToC (s ⇒ t) ∙ hat_functorC t))
       (functor_compose STLC_gen
-         (projSortToC sort Hsort C s ∙ hat_functor sort Hsort C CC t)).
+         (projSortToC s ∙ hat_functorC t)).
 
   Definition app_source_gen (s t : sort) : sortToC2 :=
     ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort C TC
@@ -238,9 +244,9 @@ Section IndAndCoind.
   Proof.
     refine (pr1 (# (pr1 (app_source_gen s t)) f) u =  BinProductOfArrows C (BP _ _) (BP _ _)  _ _).
     - exact (pr1 (# (pr1 (functor_compose STLC_gen
-                            (projSortToC sort Hsort C (s ⇒ t) ∙ hat_functor sort Hsort C CC t))) f) u).
+                            (projSortToC (s ⇒ t) ∙ hat_functorC t))) f) u).
     - exact (pr1 (# (pr1 (functor_compose STLC_gen
-                            (projSortToC sort Hsort C s ∙ hat_functor sort Hsort C CC t))) f) u).
+                            (projSortToC s ∙ hat_functorC t))) f) u).
   Defined.
 
   Lemma app_source_gen_mor_eq (s t : sort) {ξ ξ' : sortToC} (f : sortToC ⟦ ξ, ξ' ⟧) (u : sort)
@@ -267,15 +273,15 @@ Section IndAndCoind.
 
   Definition lam_source_gen_oldstyle_abstracted (s t : sort) : functor sortToC2 sortToC2 :=
     pre_comp_functor (sorted_option_functor sort Hsort C TC BC CC s)
-      ∙ post_comp_functor (projSortToC sort Hsort C t)
-      ∙ post_comp_functor (hat_functor sort Hsort C CC (s ⇒ t)).
+      ∙ post_comp_functor (projSortToC t)
+      ∙ post_comp_functor (hat_functorC (s ⇒ t)).
 
   Definition lam_source_gen_newstyle (s t : sort) : sortToC2 :=
     functor_compose
       (functor_compose
          (sorted_option_functor sort Hsort C TC BC CC s)
          STLC_gen)
-      (projSortToC sort Hsort C t ∙ hat_functor sort Hsort C CC (s ⇒ t)).
+      (projSortToC t ∙ hat_functorC (s ⇒ t)).
 
   Definition lam_source_gen (s t : sort) : sortToC2 :=
     ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort C TC
@@ -292,7 +298,7 @@ Section IndAndCoind.
       (functor_compose
          (sorted_option_functor sort Hsort C TC BC CC s)
          STLC_gen)
-      (projSortToC sort Hsort C t ∙ hat_functor sort Hsort C CC (s ⇒ t)))) f) u.
+      (projSortToC t ∙ hat_functorC (s ⇒ t)))) f) u.
   Proof.
     apply idpath.
   Qed.
@@ -791,7 +797,7 @@ Section Church.
 
   Definition IterateInfinite : sortToC2⟦corecsource, STLC_coind⟧ := pr11 (primitive_corecursion _ (pr2 STLC_coind_FC) IterateInfinite_rec_coalg).
 
-  Definition ChurchInfinity_body_sortToC_data_data (ξ : sortToC) (s : sort) : C ⟦TC, pr1 (pr1 STLC_coind (ctx_ext (ctx_ext ξ (s ⇒ s)) s)) s⟧.
+  Definition ChurchInfinity_body_sortToC_data_data (ξ : sortToC) (s : sort) : global_element TC (pr1 (pr1 STLC_coind (ctx_ext (ctx_ext ξ (s ⇒ s)) s)) s).
   Proof.
     refine (_ · pr1 (pr1 IterateInfinite (ctx_ext (ctx_ext ξ (s ⇒ s)) s)) s).
     refine (_ · pr1 (pr1 (STLC_eta_gen σcoind) (ctx_ext (ctx_ext ξ (s ⇒ s)) s)) (s ⇒ s)).
@@ -804,7 +810,7 @@ Section Church.
   Proof.
     use make_sortToC_mor.
     intro s.
-    change (C ⟦TC, pr1 (pr1 STLC_coind (ctx_ext (ctx_ext ξ (s ⇒ s)) s)) s⟧).
+    change (global_element TC (pr1 (pr1 STLC_coind (ctx_ext (ctx_ext ξ (s ⇒ s)) s)) s)).
     exact (ChurchInfinity_body_sortToC_data_data ξ s).
   Defined.
 
