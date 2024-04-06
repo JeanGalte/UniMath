@@ -47,6 +47,9 @@ Local Notation "[]" := (@nil _) (at level 0, format "[]").
 Local Notation "a + b" := (setcoprod a b) : set.
 Local Notation "'Id'" := (functor_identity _).
 
+Let sort : UU := stn 3.
+
+
 Definition a : 0 < 3.
 Proof.
   simpl.
@@ -66,19 +69,23 @@ Proof.
 Qed.
 
 (* Sort des variables *)
-Definition sv : ⟦3⟧%stn := make_stn 3 0 a.
+Definition sv : sort := make_stn 3 0 a.
 (* Sort des termes *)
-Definition st : ⟦3⟧%stn := make_stn 3 0 b.
+Definition st : sort := make_stn 3 0 b.
 (* Sort des sommes, ou eliminations alternatives *)
-Definition se : ⟦3⟧%stn := make_stn 3 0 c.
+Definition se : sort := make_stn 3 0 c.
+
+Let sortToSet : UU := (sort -> hSet).
 
 Definition UntypedForestSig : MultiSortedSig (⟦3⟧%stn).
 Proof.
-  use (make_MultiSortedSig synclass).
+  use (make_MultiSortedSig (stn 3)).
   - apply (( (unit,,isasetunit) + (nat,,isasetnat) )%set).
     - intros H. induction H  as [abs | app].
       + exact ((((sv :: []) ,,st) :: []),,st).
       + induction app.
         * exact ((([] ,,sv ) :: nil),, se).
-        *
+        * exact ( (([],, sv) :: (pr1 IHapp))  ,, se).
+Defined.
+
 End Signature.
