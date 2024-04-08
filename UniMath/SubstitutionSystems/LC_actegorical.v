@@ -143,13 +143,15 @@ Section IndAndCoind.
   Qed.
                                                                       (** the algebra maps (the "domain-specific constructors") for monotyped LC *)
   Definition LC_tau_gen : LC_Functor_H LC_gen --> LC_gen  := SigmaMonoid_τ θLC σ.
+
   Definition app_source_gen_newstyle (s : sort) : sortToSet2 :=
     BinProduct_of_functors BPsortToHSET
       (functor_compose LC_gen
          (projSortToC sort Hsort SET s ∙ hat_functor sort Hsort SET CoproductsHSET s))
       (functor_compose LC_gen
          (projSortToC sort Hsort SET s ∙ hat_functor sort Hsort SET CoproductsHSET s)).
-Definition app_source_gen (s : sort) : sortToSet2 :=
+
+  Definition app_source_gen (s : sort) : sortToSet2 :=
     ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort SET TerminalHSET
       BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort LC_Sig (inl s)) LC_gen.
 

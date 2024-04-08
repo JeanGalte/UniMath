@@ -121,7 +121,6 @@ Proof.
       intro i. apply ( ([],,se) :: []).
   Defined.
 
-
 Definition UntypedForest_Sig : MultiSortedSig (⟦3⟧%stn).
 Proof.
   use (make_MultiSortedSig (stn 3)).
@@ -152,6 +151,48 @@ Definition ctx_ext (ξ : sortToSet) (s : sort) : sortToSet
 Let σind : SigmaMonoid θForest := MultiSortedEmbeddingIndCoindHSET.σind sort Hsort UntypedForest_Sig.
 Let σcoind : SigmaMonoid θForest := MultiSortedEmbeddingIndCoindHSET.σcoind sort Hsort UntypedForest_Sig.
 
+Section IndAndCoind.
 
+  Context (σ : SigmaMonoid θForest).
+
+    Definition Forest_gen : sortToSet2 := SigmaMonoid_carrier θForest σ.
+
+  (** the type of terms in a context of a sort *)
+  Definition Forest_gen_ctx_sort (ξ : sortToSet) (s : sort) : UU
+    := pr1 (pr1 (pr1 Forest_gen ξ) s).
+
+  (** variable inclusion for syntax for forests *)
+  Definition Forest_eta_gen : sortToSet2⟦Id,Forest_gen⟧ := SigmaMonoid_η θForest σ.
+
+    Definition Forest_eta_gen_natural (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧) :
+    # Id f · pr1 Forest_eta_gen ξ' = pr1 Forest_eta_gen ξ · # (pr1 Forest_gen) f
+    := nat_trans_ax (Forest_eta_gen) ξ ξ' f.
+
+  Lemma Forest_eta_gen_natural' (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧) :
+    f · pr1 Forest_eta_gen ξ' = pr1 Forest_eta_gen ξ · # (pr1 Forest_gen) f.
+  Proof.
+    etrans.
+    2: { apply Forest_eta_gen_natural. }
+    apply idpath.
+  Qed.
+
+  Lemma Forest_eta_gen_natural'_pointwise (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧) (u : sort) :
+    pr1 f u · pr1 (pr1 Forest_eta_gen ξ') u = pr1 (pr1 Forest_eta_gen ξ) u · pr1 (# (pr1 Forest_gen) f) u.
+  Proof.
+    apply (nat_trans_eq_weq HSET _ _ (Forest_eta_gen_natural' ξ ξ' f)).
+  Qed.
+
+  Lemma Forest_eta_gen_natural'_ppointwise (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧) (u : sort) (elem : pr1 (pr1 (pr1 ξ) u)) :
+    pr1 (pr1 Forest_eta_gen ξ') u (pr1 f u elem) =  pr1 (# (pr1 Forest_gen) f) u (pr1 (pr1 Forest_eta_gen ξ) u elem).
+  Proof.
+    apply (toforallpaths _ _ _ (Forest_eta_gen_natural'_pointwise ξ ξ' f u)).
+  Qed.
+
+  Definition Forest_tau_gen : Forest_Functor_H Forest_gen --> Forest_gen := SigmaMonoid_τ θForest σ.
+
+  Definition app_source_gen (n : nat) : sortToSet2 :=
+    ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort SET TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort UntypedForest_Sig (inr n)) Forest_gen.
+
+End IndAndCoind.
 
 End Signature.
