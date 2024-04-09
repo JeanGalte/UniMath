@@ -113,21 +113,24 @@ Proof.
   apply idpath.
 Qed.
 
-Definition app_list_noind (n : nat) : list(list sort × sort).
+Definition n_list_sorts (s : sort) (n : nat) : list(list sort × sort).
 Proof.
     use tpair.
     - exact n.
     - apply weqvecfun.
-      intro i. apply ( ([],,se) :: []).
-  Defined.
+      intro i. apply([],,s).
+Defined.
+
 
 Definition UntypedForest_Sig : MultiSortedSig (⟦3⟧%stn).
 Proof.
   use (make_MultiSortedSig (stn 3)).
-  - apply (( (unit,,isasetunit) + (nat,,isasetnat) )%set).
-    - intros H. induction H  as [abs | app].
-      + exact ((((sv :: []) ,,st) :: []),,st).
-      + exact ( (app_list_noind  app) ,, st).
+  - apply ((((unit,,isasetunit) + (nat,,isasetnat)) + (nat,, isasetnat))%set).
+    - intros H. induction H  as [term_construct | elim_construct].
+      + induction term_construct as [abs|sum].
+        * exact ((((sv :: []) ,,st) :: []),,st).
+        * exact ((n_list_sorts se sum) ,, st ).
+      + exact ( (([],,sv) :: (n_list_sorts st elim_construct)),, se).
 Defined.
 
 (** The canonical functor associated with Untypedforest_Sig **)
@@ -192,6 +195,15 @@ Section IndAndCoind.
 
   Definition app_source_gen (n : nat) : sortToSet2 :=
     ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort SET TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort UntypedForest_Sig (inr n)) Forest_gen.
+
+  Definition app_source_gen_newstyle_zero : sortToSet2 :=
+    functor_compose Forest_gen (projSortToSet sv ∙ hat_functorSet st).
+(*
+  Definition app_source_gen_newstyle (n : nat) : sortToSet2 :=
+    (*produit (n produits de foncteurs   BPsortToSet
+       (functor_compose Forest_gen (projSortToSet se ∙ hat_functorSet se)))
+       (functor_compose Forest_gen (projSortToSet sv ∙ hat_functorSet st)))) *)
+*)
 
 End IndAndCoind.
 
