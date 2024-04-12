@@ -54,8 +54,11 @@ Definition sort : UU := stn 3.
 
 Local Definition  Hsort : isofhlevel 3 sort.
 Proof.
-  exact (isofhlevelssnset 1 sort (setproperty (stnset 3))).
+  Admitted.
+(*
+exact (isofhlevelssnset 1 sort (setproperty (stnset 3))).
 Qed.
+*)
 
 (* Sorte des variables *)
 Definition sv : sort := make_stn 3 0 (idpath true : 0 < 3).
@@ -180,12 +183,48 @@ Section IndAndCoind.
 
   Definition app_source_gen_newstyle_zero : sortToSet2 :=
     functor_compose Forest_gen (projSortToSet sv ∙ hat_functorSet st).
+
+Definition app_source_gen_newstyle_nonzero (n : nat) : sortToSet2 :=
+       BinProduct_of_functors  BPsortToSet
+         (functor_compose Forest_gen (projSortToSet sv ∙ hat_functorSet st))
+         (nat_rect (fun _ =>  sortToSet2)
+            (functor_compose Forest_gen (projSortToSet se ∙ hat_functorSet st))
+            (fun _ IHn => BinProduct_of_functors BPsortToSet
+                         (functor_compose Forest_gen (projSortToSet se ∙ hat_functorSet st)) IHn) n).
+
+
+Lemma app_source_zero_gen_ok : app_source_gen_newstyle_zero = app_source_gen 0.
+Proof.
+  apply idpath.
+Qed.
+
+Lemma app_source_nonzero_gen_ok (n : nat) : app_source_gen_newstyle_nonzero n = app_source_gen n.
+Proof.
+Admitted.
+
+(*Ne fonctionne pas sans que je comprenne pourquoi :  (pr1 (# (pr1 (app_source_gen n)) f) u arg) serait du mauvais type, mais on a un type analogue dans STLC_actegorical *)
 (*
-  Definition app_source_gen_newstyle (n : nat) : sortToSet2 :=
-    (*produit (n produits de foncteurs   BPsortToSet
-       (functor_compose Forest_gen (projSortToSet se ∙ hat_functorSet se)))
-       (functor_compose Forest_gen (projSortToSet sv ∙ hat_functorSet st)))) *)
-*)
+Lemma app_source_gen_mor_pr1 (n : nat) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
+    (u : sort) (arg : pr1 (pr1 (pr1 (app_source_gen n) ξ) u)) :
+    pr1 (pr1 (# (pr1 (app_source_gen n)) f) u arg) =
+      pr1 (# (pr1 (functor_compose Forest_gen ?)) f) u (pr1 arg).
+  Proof.
+    apply idpath.
+  Qed.
+
+
+Idem ici : (pr1 (# (pr1 (app_source_gen n)) f) u arg) ne semble pas correctement être typé
+
+  Lemma app_source_gen_mor_pr2 (n : nat) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
+    (u : sort) (arg : pr1 (pr1 (pr1 (app_source_gen n) ξ) u)) :
+    pr2 (pr1 (# (pr1 (app_source_gen n)) f) u arg) =
+      pr1 (# (pr1 (functor_compose Forest_gen ? )) f) u (pr2 arg).
+  Proof.
+    apply idpath.
+  Qed.
+
+ *)
+
 
 End IndAndCoind.
 
