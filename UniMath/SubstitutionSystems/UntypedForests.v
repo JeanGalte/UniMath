@@ -1,4 +1,5 @@
 Require Import UniMath.Foundations.PartD.
+Require Import UniMath.Foundations.PartB.
 Require Import UniMath.Foundations.Sets.
 
 Require Import UniMath.MoreFoundations.Tactics.
@@ -51,10 +52,10 @@ Local Notation "'Id'" := (functor_identity _).
 
 Definition sort : UU := stn 3.
 
-(* À prouver *)
 Local Definition  Hsort : isofhlevel 3 sort.
 Proof.
-Admitted.
+  exact (isofhlevelssnset 1 sort (setproperty (stnset 3))).
+Qed.
 
 (* Sorte des variables *)
 Definition sv : sort := make_stn 3 0 (idpath true : 0 < 3).
