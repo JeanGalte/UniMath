@@ -56,31 +56,12 @@ Local Definition  Hsort : isofhlevel 3 sort.
 Proof.
 Admitted.
 
-(* Voir comment contracter ces définitions *)
-Definition a : 0 < 3.
-Proof.
-  simpl.
-  apply idpath.
-Qed.
-
-Definition b : 1 < 3.
-Proof.
-  simpl.
-  apply idpath.
-Qed.
-
-Definition c : 2 < 3.
-Proof.
-  simpl.
-  apply idpath.
-Qed.
-
 (* Sorte des variables *)
-Definition sv : sort := make_stn 3 0 a.
+Definition sv : sort := make_stn 3 0 (idpath true : 0 < 3).
 (* Sorte des termes *)
-Definition st : sort := make_stn 3 0 b.
+Definition st : sort := make_stn 3 0 (idpath true : 1 < 3).
 (* Sorte des sommes, ou eliminations alternatives *)
-Definition se : sort := make_stn 3 0 c.
+Definition se : sort := make_stn 3 0 (idpath true : 2 < 3).
 
 Let sortToSet : category := SortIndexing.sortToSet sort Hsort.
 Let sortToSetSet : category := SortIndexing.sortToSetSet sort Hsort.
