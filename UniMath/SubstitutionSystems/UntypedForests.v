@@ -54,11 +54,8 @@ Definition sort : UU := stn 3.
 
 Local Definition  Hsort : isofhlevel 3 sort.
 Proof.
-  Admitted.
-(*
 exact (isofhlevelssnset 1 sort (setproperty (stnset 3))).
 Qed.
-*)
 
 (* Sorte des variables *)
 Definition sv : sort := make_stn 3 0 (idpath true : 0 < 3).
@@ -107,7 +104,7 @@ Proof.
 Defined.
 
 
-Definition UntypedForest_Sig : MultiSortedSig (⟦3⟧%stn).
+Definition Forest_Sig : MultiSortedSig (⟦3⟧%stn).
 Proof.
   use (make_MultiSortedSig (stn 3)).
   - apply ((((unit,,isasetunit) + (nat,,isasetnat)) + (nat,, isasetnat))%set).
@@ -118,10 +115,10 @@ Proof.
       + exact ( (([],,sv) :: (n_list_sorts st elim_construct)),, se).
 Defined.
 
-(** The canonical functor associated with Untypedforest_Sig **)
+(** The canonical functor associated with Forest_Sig **)
 Definition Forest_Functor_H : functor sortToSet2 sortToSet2 :=
   MultiSorted_actegorical.MultiSortedSigToFunctor' sort Hsort SET
-    TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET UntypedForest_Sig.
+    TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET Forest_Sig.
 
 
 (** the functor of which the fixed points are considered *)
@@ -130,14 +127,14 @@ Definition Forest_Functor_Id_H : functor sortToSet2 sortToSet2 :=
 
 (** the canonical strength associated with UntypedForest_Sig *)
 Let θForest := MultiSortedMonadConstruction_actegorical.MultiSortedSigToStrength' sort Hsort SET
-               TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET UntypedForest_Sig.
+               TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET Forest_Sig.
 
 Definition ctx_ext (ξ : sortToSet) (s : sort) : sortToSet
   := sorted_option_functorSet s ξ.
 
 (** the sigma-monoids for wellfounded and non-wellfounded syntax for Forests *)
-Let σind : SigmaMonoid θForest := MultiSortedEmbeddingIndCoindHSET.σind sort Hsort UntypedForest_Sig.
-Let σcoind : SigmaMonoid θForest := MultiSortedEmbeddingIndCoindHSET.σcoind sort Hsort UntypedForest_Sig.
+Let σind : SigmaMonoid θForest := MultiSortedEmbeddingIndCoindHSET.σind sort Hsort Forest_Sig.
+Let σcoind : SigmaMonoid θForest := MultiSortedEmbeddingIndCoindHSET.σcoind sort Hsort Forest_Sig.
 
 Section IndAndCoind.
 
@@ -179,7 +176,7 @@ Section IndAndCoind.
   Definition Forest_tau_gen : Forest_Functor_H Forest_gen --> Forest_gen := SigmaMonoid_τ θForest σ.
 
   Definition app_source_gen (n : nat) : sortToSet2 :=
-    ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort SET TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort UntypedForest_Sig (inr n)) Forest_gen.
+    ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort SET TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort Forest_Sig (inr n)) Forest_gen.
 
   Definition app_source_gen_newstyle_zero : sortToSet2 :=
     functor_compose Forest_gen (projSortToSet sv ∙ hat_functorSet st).
@@ -202,28 +199,71 @@ Lemma app_source_nonzero_gen_ok (n : nat) : app_source_gen_newstyle_nonzero n = 
 Proof.
 Admitted.
 
-(*Ne fonctionne pas sans que je comprenne pourquoi :  (pr1 (# (pr1 (app_source_gen n)) f) u arg) serait du mauvais type, mais on a un type analogue dans STLC_actegorical *)
+
 (*
-Lemma app_source_gen_mor_pr1 (n : nat) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
+
+On devrait pouvoir définir app_source_gen_mor_pr1 mais 2 problèmes que je n'ai pas su résoudre :
+-Manifestement (pr1 (# (pr1 (app_source_gen n)) f) u arg) n'est pas typé comme on le voudrait. C'est surprenant parce que par analogie avec le fichier STLC_actegorical.v, app_source_gen_mor_pr1 est défini de la même façon et (pr1 (# (pr1 (app_source_gen s t)) f) u arg) est bien typé (pr1 (# (pr1 (app_source_gen n)) f) u arg) et cela fonctionne, alors qu'ici l'erreur suivante est levée :
+
+
+The term "pr1 (# (pr1 (app_source_gen n)) f) u arg" has type
+ "pr1hSet (pr1 (app_source_gen n) ξ' u)"
+while it is expected to have type "∑ y, ?P y".
+
+Je ne comprends pas pourquoi coq s'attend à avoir ce type, et non pas le même que celui de STLC_actegorical alors que tout est réécrit par analogie.
+
+-Je ne suis pas certain de quoi mettre dans ??? (pour faire mes tests j'ai seulement commencé en écrivant projSortToSet st, ce qui ne donne pas l'égalité qu'on veut, mais comme ça ne typecheck pas de toute façon ça ne change rien). Je pense qu'il faudrait définir par induction à part ce qu'on a dans app_source_gen_newstyle_nonzero, et "coller" cette définition avec app_source_gen_newstyle_zero
+
+  Lemma app_source_gen_mor_pr1 (n : nat) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
     (u : sort) (arg : pr1 (pr1 (pr1 (app_source_gen n) ξ) u)) :
     pr1 (pr1 (# (pr1 (app_source_gen n)) f) u arg) =
-      pr1 (# (pr1 (functor_compose Forest_gen ?)) f) u (pr1 arg).
+      pr1 (# (pr1 (functor_compose Forest_gen (???) )) f) u (pr1 arg).
   Proof.
     apply idpath.
   Qed.
 
+Le même problème de typage se présente sur app_source_gen_mor_pr2
+*)
 
-Idem ici : (pr1 (# (pr1 (app_source_gen n)) f) u arg) ne semble pas correctement être typé
-
-  Lemma app_source_gen_mor_pr2 (n : nat) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
-    (u : sort) (arg : pr1 (pr1 (pr1 (app_source_gen n) ξ) u)) :
-    pr2 (pr1 (# (pr1 (app_source_gen n)) f) u arg) =
-      pr1 (# (pr1 (functor_compose Forest_gen ? )) f) u (pr2 arg).
+Definition app_map_gen (n : nat) : sortToSet2⟦app_source_gen n,Forest_gen⟧.
   Proof.
-    apply idpath.
+    exact (CoproductIn _ _ (Coproducts_functor_precat _ _ _ _ (λ _ , _ )) (inr n) · Forest_tau_gen) .
+  Defined.
+
+Definition app_map_gen_natural (n : nat) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
+    : # (pr1 (app_source_gen n)) f · pr1 (app_map_gen n) ξ' = pr1 (app_map_gen n) ξ · # (pr1 Forest_gen) f
+    := nat_trans_ax (app_map_gen n) ξ ξ' f.
+
+Lemma app_map_gen_natural_pointwise (n : nat) (ξ ξ' : sortToSet) (f : sortToSet  ⟦ ξ, ξ' ⟧) (u : sort) :
+  pr1 (# (pr1 (app_source_gen n)) f) u · pr1 (pr1 (app_map_gen n) ξ') u =
+  pr1 (pr1 (app_map_gen n) ξ) u · pr1 (# (pr1 Forest_gen) f) u.
+Proof.
+   apply (nat_trans_eq_weq HSET _ _ (app_map_gen_natural n ξ ξ' f)).
+Qed.
+
+Lemma app_map_gen_natural_ppointwise (n : nat) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
+    (u : sort) (elem : pr1 (pr1 (pr1 (app_source_gen n) ξ) u)) :
+    pr1 (pr1 (app_map_gen n) ξ') u (pr1 (# (pr1 (app_source_gen n)) f) u elem) =
+      pr1 (# (pr1 Forest_gen) f) u (pr1 (pr1 (app_map_gen n) ξ) u elem).
+  Proof.
+    apply (toforallpaths _ _ _ (app_map_gen_natural_pointwise n ξ ξ' f u)).
   Qed.
 
- *)
+Definition lam_source_gen_newstyle :  sortToSet2 :=
+    functor_compose
+      (functor_compose
+         (sorted_option_functorSet sv)
+         Forest_gen)
+      (projSortToSet st ∙ hat_functorSet st).
+
+Definition lam_source_gen : sortToSet2 :=
+  ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort SET TerminalHSET
+      BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort Forest_Sig (inl (inl tt ))) Forest_gen.
+
+Lemma lam_source_ok : lam_source_gen = lam_source_gen_newstyle.
+Proof.
+  apply idpath.
+Qed.
 
 
 End IndAndCoind.
