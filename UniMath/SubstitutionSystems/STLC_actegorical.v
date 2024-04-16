@@ -212,8 +212,11 @@ Section IndAndCoind.
   Qed.
 
   (** The application constructor *)
-  Definition app_map_gen (s t : sort) : sortToSet2⟦app_source_gen s t,STLC_gen⟧ :=
-    CoproductIn _ _ (Coproducts_functor_precat _ _ _ _ (λ _, _)) (ii1 (s,,t)) · STLC_tau_gen.
+  Definition app_map_gen (s t : sort) : sortToSet2⟦app_source_gen s t,STLC_gen ⟧ .
+    Proof.
+    exact (CoproductIn _ _ (Coproducts_functor_precat _ _ _ _ (λ _, _)) (inl (s,,t)) · STLC_tau_gen).
+    Defined.
+
 
   Definition app_map_gen_natural (s t : sort) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
     : # (pr1 (app_source_gen s t)) f · pr1 (app_map_gen s t) ξ' = pr1 (app_map_gen s t) ξ · # (pr1 STLC_gen) f
