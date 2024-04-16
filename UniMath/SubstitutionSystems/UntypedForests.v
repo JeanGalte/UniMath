@@ -293,8 +293,9 @@ Definition sum_source_gen (n : nat) : sortToSet2 :=
 (*
 Ici le "0" des sommes de l'article sur la recherche coinductive de preuves.
 *)
-  Definition sum_source_gen_newstyle_zero : sortToSet2 :=
-    functor_compose Forest_gen (projSortToSet st).
+
+Definition sum_source_gen_newstyle_zero : sortToSet2 :=
+   functor_compose Forest_gen (projSortToSet st ∙ hat_functorSet st).
 
 Definition app_source_gen_newstyle_nonzero (n : nat) : sortToSet2 :=
        BinProduct_of_functors  BPsortToSet
