@@ -238,6 +238,26 @@ Section IndAndCoind.
   Qed.
 
 
+  Definition app_map_gen_natural (s t : sort) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
+    : # (pr1 (app_source_gen s t)) f · pr1 (app_map_gen s t) ξ' = pr1 (app_map_gen s t) ξ · # (pr1 STLC_gen) f
+    := nat_trans_ax (app_map_gen s t) ξ ξ' f.
+
+  Lemma app_map_gen_natural_pointwise (s t : sort) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧) (u : sort)
+    : pr1 (# (pr1 (app_source_gen s t)) f) u · pr1 (pr1 (app_map_gen s t) ξ') u =
+        pr1 (pr1 (app_map_gen s t) ξ) u · pr1 (# (pr1 STLC_gen) f) u.
+  Proof.
+    apply (nat_trans_eq_weq HSET _ _ (app_map_gen_natural s t ξ ξ' f)).
+  Qed.
+
+  Lemma app_map_gen_natural_ppointwise (s t : sort) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
+    (u : sort) (elem : pr1 (pr1 (pr1 (app_source_gen s t) ξ) u)) :
+    pr1 (pr1 (app_map_gen s t) ξ') u (pr1 (# (pr1 (app_source_gen s t)) f) u elem) =
+      pr1 (# (pr1 STLC_gen) f) u (pr1 (pr1 (app_map_gen s t) ξ) u elem).
+  Proof.
+    apply (toforallpaths _ _ _ (app_map_gen_natural_pointwise s t ξ ξ' f u)).
+  Qed.
+
+
   Definition lam_source_gen_oldstyle_abstracted (s t : sort) : functor sortToSet2 sortToSet2 :=
     pre_comp_functor (sorted_option_functorSet s)
       ∙ post_comp_functor (projSortToSet t) ∙ post_comp_functor (hat_functorSet (s ⇒ t)).
