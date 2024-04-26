@@ -138,56 +138,56 @@ Let σcoind : SigmaMonoid θForest := MultiSortedEmbeddingIndCoindHSET.σcoind s
 
 Section IndAndCoind.
 
-  Context (σ : SigmaMonoid θForest).
+Context (σ : SigmaMonoid θForest).
 
-    Definition Forest_gen : sortToSet2 := SigmaMonoid_carrier θForest σ.
+Definition Forest_gen : sortToSet2 := SigmaMonoid_carrier θForest σ.
 
-  (** the type of terms in a context of a sort *)
-  Definition Forest_gen_ctx_sort (ξ : sortToSet) (s : sort) : UU
-    := pr1 (pr1 (pr1 Forest_gen ξ) s).
+(** the type of terms in a context of a sort *)
+Definition Forest_gen_ctx_sort (ξ : sortToSet) (s : sort) : UU
+  := pr1 (pr1 (pr1 Forest_gen ξ) s).
 
-  (** variable inclusion for syntax for forests *)
-  Definition Forest_eta_gen : sortToSet2⟦Id,Forest_gen⟧ := SigmaMonoid_η θForest σ.
+(** variable inclusion for syntax for forests *)
+Definition Forest_eta_gen : sortToSet2⟦Id,Forest_gen⟧ := SigmaMonoid_η θForest σ.
 
-    Definition Forest_eta_gen_natural (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧) :
-    # Id f · pr1 Forest_eta_gen ξ' = pr1 Forest_eta_gen ξ · # (pr1 Forest_gen) f
-    := nat_trans_ax (Forest_eta_gen) ξ ξ' f.
+Definition Forest_eta_gen_natural (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧) :
+# Id f · pr1 Forest_eta_gen ξ' = pr1 Forest_eta_gen ξ · # (pr1 Forest_gen) f
+:= nat_trans_ax (Forest_eta_gen) ξ ξ' f.
 
-  Lemma Forest_eta_gen_natural' (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧) :
-    f · pr1 Forest_eta_gen ξ' = pr1 Forest_eta_gen ξ · # (pr1 Forest_gen) f.
-  Proof.
-    etrans.
-    2: { apply Forest_eta_gen_natural. }
-    apply idpath.
-  Qed.
+Lemma Forest_eta_gen_natural' (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧) :
+  f · pr1 Forest_eta_gen ξ' = pr1 Forest_eta_gen ξ · # (pr1 Forest_gen) f.
+Proof.
+  etrans.
+  2: { apply Forest_eta_gen_natural. }
+  apply idpath.
+Qed.
 
-  Lemma Forest_eta_gen_natural'_pointwise (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧) (u : sort) :
-    pr1 f u · pr1 (pr1 Forest_eta_gen ξ') u = pr1 (pr1 Forest_eta_gen ξ) u · pr1 (# (pr1 Forest_gen) f) u.
-  Proof.
-    apply (nat_trans_eq_weq HSET _ _ (Forest_eta_gen_natural' ξ ξ' f)).
-  Qed.
+Lemma Forest_eta_gen_natural'_pointwise (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧) (u : sort) :
+  pr1 f u · pr1 (pr1 Forest_eta_gen ξ') u = pr1 (pr1 Forest_eta_gen ξ) u · pr1 (# (pr1 Forest_gen) f) u.
+Proof.
+  apply (nat_trans_eq_weq HSET _ _ (Forest_eta_gen_natural' ξ ξ' f)).
+Qed.
 
-  Lemma Forest_eta_gen_natural'_ppointwise (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧) (u : sort) (elem : pr1 (pr1 (pr1 ξ) u)) :
-    pr1 (pr1 Forest_eta_gen ξ') u (pr1 f u elem) =  pr1 (# (pr1 Forest_gen) f) u (pr1 (pr1 Forest_eta_gen ξ) u elem).
-  Proof.
-    apply (toforallpaths _ _ _ (Forest_eta_gen_natural'_pointwise ξ ξ' f u)).
-  Qed.
+Lemma Forest_eta_gen_natural'_ppointwise (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧) (u : sort) (elem : pr1 (pr1 (pr1 ξ) u)) :
+  pr1 (pr1 Forest_eta_gen ξ') u (pr1 f u elem) =  pr1 (# (pr1 Forest_gen) f) u (pr1 (pr1 Forest_eta_gen ξ) u elem).
+Proof.
+  apply (toforallpaths _ _ _ (Forest_eta_gen_natural'_pointwise ξ ξ' f u)).
+Qed.
 
-  Definition Forest_tau_gen : Forest_Functor_H Forest_gen --> Forest_gen := SigmaMonoid_τ θForest σ.
+Definition Forest_tau_gen : Forest_Functor_H Forest_gen --> Forest_gen := SigmaMonoid_τ θForest σ.
 
-  Definition app_source_gen (n : nat) : sortToSet2 :=
-    ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort SET TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort Forest_Sig (inr n)) Forest_gen.
+Definition app_source_gen (n : nat) : sortToSet2 :=
+  ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort SET TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort Forest_Sig (inr n)) Forest_gen.
 
-  Definition app_source_gen_newstyle_zero : sortToSet2 :=
-    functor_compose Forest_gen (projSortToSet sv ∙ hat_functorSet st).
+Definition app_source_gen_newstyle_zero : sortToSet2 :=
+  functor_compose Forest_gen (projSortToSet sv ∙ hat_functorSet st).
 
 Definition app_source_gen_newstyle_nonzero (n : nat) : sortToSet2 :=
-       BinProduct_of_functors  BPsortToSet
-         (functor_compose Forest_gen (projSortToSet sv ∙ hat_functorSet st))
-         (nat_rect (fun _ =>  sortToSet2)
-            (functor_compose Forest_gen (projSortToSet se ∙ hat_functorSet st))
-            (fun _ IHn => BinProduct_of_functors BPsortToSet
-                         (functor_compose Forest_gen (projSortToSet se ∙ hat_functorSet st)) IHn) n).
+     BinProduct_of_functors  BPsortToSet
+       (functor_compose Forest_gen (projSortToSet sv ∙ hat_functorSet st))
+       (nat_rect (fun _ =>  sortToSet2)
+          (functor_compose Forest_gen (projSortToSet se ∙ hat_functorSet st))
+          (fun _ IHn => BinProduct_of_functors BPsortToSet
+                       (functor_compose Forest_gen (projSortToSet se ∙ hat_functorSet st)) IHn) n).
 
 
 Lemma app_source_zero_gen_ok : app_source_gen_newstyle_zero = app_source_gen 0.
@@ -292,77 +292,49 @@ Definition sum_source_gen (n : nat) : sortToSet2 :=
 
 (*
 Ici le "0" des sommes de l'article sur la recherche coinductive de preuves.
+Pas certain de cette définition : projSortToSet est appliqué à se mais techniquement le 0 ne prend aucun élément.
 *)
-
 Definition sum_source_gen_newstyle_zero : sortToSet2 :=
-   functor_compose Forest_gen (projSortToSet st ∙ hat_functorSet st).
+  functor_compose Forest_gen (projSortToSet se ∙ hat_functorSet st).
 
-Definition app_source_gen_newstyle_nonzero (n : nat) : sortToSet2 :=
-       BinProduct_of_functors  BPsortToSet
-         (functor_compose Forest_gen (projSortToSet sv ∙ hat_functorSet st))
+Definition sum_source_gen_newstyle_nonzero (n : nat) : sortToSet2 :=
          (nat_rect (fun _ =>  sortToSet2)
             (functor_compose Forest_gen (projSortToSet se ∙ hat_functorSet st))
             (fun _ IHn => BinProduct_of_functors BPsortToSet
-                         (functor_compose Forest_gen (projSortToSet se ∙ hat_functorSet st)) IHn) n).
+                         (functor_compose Forest_gen (projSortToSet st ∙ hat_functorSet st)) IHn) n).
 
 
-Lemma app_source_zero_gen_ok : app_source_gen_newstyle_zero = app_source_gen 0.
+Lemma sum_source_zero_gen_ok : app_source_gen_newstyle_zero = app_source_gen 0.
 Proof.
   apply idpath.
 Qed.
 
-Lemma app_source_nonzero_gen_ok (n : nat) : app_source_gen_newstyle_nonzero n = app_source_gen n.
+Lemma sum_source_nonzero_gen_ok (n : nat) : app_source_gen_newstyle_nonzero n = app_source_gen n.
 Proof.
 Admitted.
 
-
-(*
-
-On devrait pouvoir définir app_source_gen_mor_pr1 mais 2 problèmes que je n'ai pas su résoudre :
--Manifestement (pr1 (# (pr1 (app_source_gen n)) f) u arg) n'est pas typé comme on le voudrait. C'est surprenant parce que par analogie avec le fichier STLC_actegorical.v, app_source_gen_mor_pr1 est défini de la même façon et (pr1 (# (pr1 (app_source_gen s t)) f) u arg) est bien typé (pr1 (# (pr1 (app_source_gen n)) f) u arg) et cela fonctionne, alors qu'ici l'erreur suivante est levée :
-
-
-The term "pr1 (# (pr1 (app_source_gen n)) f) u arg" has type
- "pr1hSet (pr1 (app_source_gen n) ξ' u)"
-while it is expected to have type "∑ y, ?P y".
-
-Je ne comprends pas pourquoi coq s'attend à avoir ce type, et non pas le même que celui de STLC_actegorical alors que tout est réécrit par analogie.
-
--Je ne suis pas certain de quoi mettre dans ??? (pour faire mes tests j'ai seulement commencé en écrivant projSortToSet st, ce qui ne donne pas l'égalité qu'on veut, mais comme ça ne typecheck pas de toute façon ça ne change rien). Je pense qu'il faudrait définir par induction à part ce qu'on a dans app_source_gen_newstyle_nonzero, et "coller" cette définition avec app_source_gen_newstyle_zero
-
-  Lemma app_source_gen_mor_pr1 (n : nat) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
-    (u : sort) (arg : pr1 (pr1 (pr1 (app_source_gen n) ξ) u)) :
-    pr1 (pr1 (# (pr1 (app_source_gen n)) f) u arg) =
-      pr1 (# (pr1 (functor_compose Forest_gen (???) )) f) u (pr1 arg).
+Definition sum_map_gen (n : nat) : sortToSet2⟦sum_source_gen n,Forest_gen⟧.
   Proof.
-    apply idpath.
-  Qed.
-
-Le même problème de typage se présente sur app_source_gen_mor_pr2
-*)
-
-Definition app_map_gen (n : nat) : sortToSet2⟦app_source_gen n,Forest_gen⟧.
-  Proof.
-    exact (CoproductIn _ _ (Coproducts_functor_precat _ _ _ _ (λ _ , _ )) (inr n) · Forest_tau_gen) .
+    exact (CoproductIn _ _ (Coproducts_functor_precat _ _ _ _ (λ _ , _ )) (inl (inr n)) · Forest_tau_gen) .
   Defined.
 
-Definition app_map_gen_natural (n : nat) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
-    : # (pr1 (app_source_gen n)) f · pr1 (app_map_gen n) ξ' = pr1 (app_map_gen n) ξ · # (pr1 Forest_gen) f
-    := nat_trans_ax (app_map_gen n) ξ ξ' f.
+Definition sum_map_gen_natural (n : nat) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
+    : # (pr1 (sum_source_gen n)) f · pr1 (sum_map_gen n) ξ' = pr1 (sum_map_gen n) ξ · # (pr1 Forest_gen) f
+    := nat_trans_ax (sum_map_gen n) ξ ξ' f.
 
-Lemma app_map_gen_natural_pointwise (n : nat) (ξ ξ' : sortToSet) (f : sortToSet  ⟦ ξ, ξ' ⟧) (u : sort) :
-  pr1 (# (pr1 (app_source_gen n)) f) u · pr1 (pr1 (app_map_gen n) ξ') u =
-  pr1 (pr1 (app_map_gen n) ξ) u · pr1 (# (pr1 Forest_gen) f) u.
+Lemma sum_map_gen_natural_pointwise (n : nat) (ξ ξ' : sortToSet) (f : sortToSet  ⟦ ξ, ξ' ⟧) (u : sort) :
+  pr1 (# (pr1 (sum_source_gen n)) f) u · pr1 (pr1 (sum_map_gen n) ξ') u =
+  pr1 (pr1 (sum_map_gen n) ξ) u · pr1 (# (pr1 Forest_gen) f) u.
 Proof.
-   apply (nat_trans_eq_weq HSET _ _ (app_map_gen_natural n ξ ξ' f)).
+   apply (nat_trans_eq_weq HSET _ _ (sum_map_gen_natural n ξ ξ' f)).
 Qed.
 
-Lemma app_map_gen_natural_ppointwise (n : nat) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
-    (u : sort) (elem : pr1 (pr1 (pr1 (app_source_gen n) ξ) u)) :
-    pr1 (pr1 (app_map_gen n) ξ') u (pr1 (# (pr1 (app_source_gen n)) f) u elem) =
-      pr1 (# (pr1 Forest_gen) f) u (pr1 (pr1 (app_map_gen n) ξ) u elem).
+Lemma sum_map_gen_natural_ppointwise (n : nat) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
+    (u : sort) (elem : pr1 (pr1 (pr1 (sum_source_gen n) ξ) u)) :
+    pr1 (pr1 (sum_map_gen n) ξ') u (pr1 (# (pr1 (sum_source_gen n)) f) u elem) =
+      pr1 (# (pr1 Forest_gen) f) u (pr1 (pr1 (sum_map_gen n) ξ) u elem).
   Proof.
-    apply (toforallpaths _ _ _ (app_map_gen_natural_pointwise n ξ ξ' f u)).
+    apply (toforallpaths _ _ _ (sum_map_gen_natural_pointwise n ξ ξ' f u)).
   Qed.
 
 
