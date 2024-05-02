@@ -53,6 +53,15 @@ Local Notation "'Id'" := (functor_identity _).
 
 Context (atom : hSet) (otype : hSet) (atotype : atom -> otype) (arr : otype → otype → otype) (plus : list otype -> otype).
 
+(*
+Le "plus" est commutatif en principe, donc la structure de liste est "en trop", mais je n'ai pas trouvé mieux
+
+Pourquoi la coercion ne fonctionne pas ici ?
+
+Coercion atotype : hSet  >-> hSet.
+
+*)
+
 Local Notation "s ⇒ t" := (arr s t).
 Local Notation "0" := (plus nil).
 
@@ -118,18 +127,61 @@ Proof.
       intro i. apply([],,s).
 Defined.
 
+Definition otype_list_set : isaset (list otype).
+Admitted.
+
+Definition otype_list_as_set := (list otype ,, otype_list_set).
+
+
+Definition wrap_types_for_sig : syntcat -> otype  -> (list sort × sort).
+Proof.
+  intros s t.
+  exact (nil ,, (t ,, s)).
+Qed.
+
+Definition wrap_sig_summands : otype -> (list sort × sort) := wrap_types_for_sig  se.
+
+Definition wrap_sig_app : otype -> (list sort × sort) := wrap_types_for_sig st .
+
+
+(*
+Ici si on avait la coercion de types (que je n'ai pas réussi à établir) :
+
+Definition sig_app_var_otype : atom ->  list otype -> otype.
+Proof.
+  intros p l.
+  exact (foldr arr p l).
+Qed.
+
+*)
+Definition sig_app_var_otype : otype ->  list otype -> otype.
+Proof.
+  intros p l.
+  exact (foldr arr p l).
+Qed.
+
+(*
+Avec la coercion de types (que je n'ai pas réussi à établir) : le dernier argument est otypes_list_as_set × otype, et on applique sig_app_var_otype
+*)
+
 Definition Forest_Sig : MultiSortedSig sort.
 Proof.
   use (make_MultiSortedSig sort ).
-  - apply ((((sort × sort) + (nat,,isasetnat)) + (nat,, isasetnat))%set).
+  - apply ((( (otype × otype) + otype_list_as_set) + (otype_list_as_set × otype))%set).
     - intros H. induction H  as [term_construct | elim_construct].
-      + induction term_construct as [abs|sum].
-        * induction abs as [s t].
-           exact ((([],,(s ⇒ t)) :: ([],,s) :: nil),,t).
-
-        * exact ((n_list_sorts se sum) ,, st ).
-      + exact ( (([],,sv) :: (n_list_sorts st elim_construct)),, se).
+      + induction term_construct as [abs|summands].
+        * induction abs as [a b].
+          exact ((((cons (a ,, sv)  []) ,, (b ,, st)) :: []) ,,  ((a ⇒ b),, st) ).
+        * exact ( (map wrap_sig_summands summands),, ( plus summands ,, st)).
+      + induction elim_construct as [B p].
+        exact (( ([],, ( sig_app_var_otype p B,, sv) ) :: (map wrap_sig_app B))  ,, (p ,, se)).
 Defined.
+
+(*
+
+Fin de transmission
+
+*)
 
 (** The canonical functor associated with Forest_Sig **)
 Definition Forest_Functor_H : functor sortToSet2 sortToSet2 :=
