@@ -6,7 +6,8 @@ Thanks to that development, the inductive and the coinductive calculus are expos
 The entire development is only done for the base category [HSET] and thus profits from having inhabitants of the objects
 and having functions as morphisms.
 
-2024
+  2024
+
 *)
 
 
