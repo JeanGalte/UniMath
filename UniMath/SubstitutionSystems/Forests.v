@@ -1,3 +1,14 @@
+(**
+
+Syntax of the forest calculus (see https://arxiv.org/abs/1602.04382 by José Espírito Santo, Ralph Matthes, Luís Pinto)
+)  in fully typed format as a multisorted signature based on the actegorical development.
+Thanks to that development, the inductive and the coinductive calculus are exposed in parallel.
+The entire development is only done for the base category [HSET] and thus profits from having inhabitants of the objects
+and having functions as morphisms.
+
+*)
+
+
 Require Import UniMath.Foundations.PartD.
 Require Import UniMath.Foundations.PartB.
 Require Import UniMath.Foundations.Sets.
@@ -29,6 +40,7 @@ Require Import UniMath.CategoryTheory.Categories.HSET.Colimits.
 Require Import UniMath.CategoryTheory.Categories.HSET.Limits.
 Require Import UniMath.CategoryTheory.Categories.HSET.Structures.
 Require Import UniMath.CategoryTheory.Categories.HSET.Univalence.
+
 Require Import UniMath.SubstitutionSystems.SigmaMonoids.
 Require UniMath.SubstitutionSystems.SortIndexing.
 Require Import UniMath.SubstitutionSystems.MultiSortedBindingSig.
@@ -51,32 +63,22 @@ Local Notation "[]" := (@nil _) (at level 0, format "[]").
 Local Notation "a + b" := (setcoprod a b) : set.
 Local Notation "'Id'" := (functor_identity _).
 
-Context (atom : hSet) (otype : hSet) (atotype : atom -> otype) (arr : otype → otype → otype) (plus : list otype -> otype).
-
-(*
-Le "plus" est commutatif en principe, donc la structure de liste est "en trop", mais je n'ai pas trouvé mieux
-
-A FIX : établir cette coercion (mais jsp encore comment faire, demain lire réponse de belazy)
-
-Coercion atotype : hSet  >-> hSet.
-
-*)
+Context (atom : hSet) (otype : hSet) (atotype : atom -> otype) (arr : otype → otype → otype) (plus : nat -> atom -> atom).
 
 Local Notation "s ⇒ t" := (arr s t).
 Local Notation "0" := (plus nil).
 
-(*
-Coïncide avec les "sortes" pour la version non typée du calcul : variables, elimination alternatives, et termes
-*)
+(** same as "sorts" for the untyped calculus, which are syntactic categories. See UntypedForests.v *)
 Definition syntcat : UU := stn 3.
 
-(* Sorte des variables *)
+(* variables category *)
 Definition sv : syntcat := make_stn 3 0 (idpath true : 0 < 3).
-(* Sorte des termes *)
+(* terms category *)
 Definition st : syntcat := make_stn 3 0 (idpath true : 1 < 3).
-(* Sorte des sommes, ou eliminations alternatives *)
+(* elimination alternatives category *)
 Definition se : syntcat := make_stn 3 0 (idpath true : 2 < 3).
 
+(** A sort is a type ('object type', i.e types for the forests, not types from coq) and a syntactic category *)
 Definition sort : UU := otype × syntcat.
 
 Local Definition Hotype : isofhlevel 3 otype := MultiSortedBindingSig.STLC_Hsort otype.
@@ -84,8 +86,6 @@ Local Definition Hotype : isofhlevel 3 otype := MultiSortedBindingSig.STLC_Hsort
 Local Definition Hsyntcat : isofhlevel 3 syntcat := isofhlevelssnset 1 syntcat (setproperty (stnset 3)).
 
 Local Definition Hsort : isofhlevel 3 sort := isofhleveldirprod 3 otype syntcat Hotype Hsyntcat.
-
-(* fin de la partie à regarder *)
 
 Let sortToSet : category := SortIndexing.sortToSet sort Hsort.
 Let sortToSetSet : category := SortIndexing.sortToSetSet sort Hsort.
@@ -119,73 +119,47 @@ Proof.
   apply idpath.
 Qed.
 
-(*
-
-A fix : regarder comment on peut prouver ça
-
-*)
-
 Definition otype_list_set : isaset (list otype).
-Admitted.
+Proof.
+  apply isofhlevellist.
+  apply otype.
+Qed.
 
 Definition otype_list_as_set := (list otype ,, otype_list_set).
 
-
-Definition wrap_sig_app : otype  -> (list sort × sort).
+Definition wrap_sig_app : otype -> (list sort × sort).
 Proof.
   intros t.
-  exact (nil ,, (t ,, st)).
+  exact ([] ,, (t ,, st)).
 Qed.
-
-(*
-Ici si on avait la coercion de types (que je n'ai pas réussi à établir) :
 
 Definition sig_app_var_otype : atom ->  list otype -> otype.
 Proof.
   intros p l.
-  exact (foldr arr p l).
+  exact (foldr arr (atotype p) l).
 Qed.
 
-*)
-Definition sig_app_var_otype : otype ->  list otype -> otype.
-Proof.
-  intros p l.
-  exact (foldr arr p l).
-Qed.
-
-
-(* Avec la coercion de types : p est un atome *)
-Definition wrap_sig_sum (n : nat) (p : otype) : list(list sort × sort).
+Definition wrap_sig_sum (n : nat) (p : atom) : list(list sort × sort).
 Proof.
     use tpair.
     - exact n.
     - apply weqvecfun.
-      intro i. apply ( [] ,, (p ,, se) ).
+      intro i. apply ( [] ,, (atotype p ,, se) ).
 Defined.
-
-(*
-Avec la coercion de types (que je n'ai pas réussi à établir) : le dernier argument est otypes_list_as_set × otype, et on applique sig_app_var_otype. La somme est également modifiée : l'argument est un atom (voir plus haut pour modifier le wrapper).
-*)
 
 Definition Forest_Sig : MultiSortedSig sort.
 Proof.
   use (make_MultiSortedSig sort ).
-  - apply ((( (otype × otype) + (otype × (nat ,, isasetnat )) ) + (otype_list_as_set × otype))%set).
+  - apply ((( (otype × otype) + (atom × (nat ,, isasetnat )) ) + (otype_list_as_set × atom))%set).
     - intros H. induction H  as [term_construct | elim_construct].
       + induction term_construct as [abs|sum].
         * induction abs as [a b].
           exact ((((cons (a ,, sv)  []) ,, (b ,, st)) :: []) ,,  ((a ⇒ b),, st) ).
         * induction sum as [p n].
-          exact ( (wrap_sig_sum  n p) ,, (p  ,, st)).
+          exact ( (wrap_sig_sum  n  p) ,, ((atotype p)  ,, st)).
       + induction elim_construct as [B p].
-        exact (( ([],, ( sig_app_var_otype p B,, sv) ) :: (map wrap_sig_app B))  ,, (p ,, se)).
+        exact (( ([],, ( sig_app_var_otype p B,, sv)) :: (map wrap_sig_app B))  ,, ((atotype p) ,, se)).
 Defined.
-
-(*
-
-Fin de transmission
-
-*)
 
 (** The canonical functor associated with Forest_Sig **)
 Definition Forest_Functor_H : functor sortToSet2 sortToSet2 :=
@@ -197,7 +171,7 @@ Definition Forest_Functor_H : functor sortToSet2 sortToSet2 :=
 Definition Forest_Functor_Id_H : functor sortToSet2 sortToSet2 :=
   SubstitutionSystems.Id_H sortToSet BCsortToSet Forest_Functor_H.
 
-(** the canonical strength associated with UntypedForest_Sig *)
+(** the canonical strength associated with Forest_Sig *)
 Let θForest := MultiSortedMonadConstruction_actegorical.MultiSortedSigToStrength' sort Hsort SET
                TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET Forest_Sig.
 
@@ -247,190 +221,37 @@ Qed.
 
 Definition Forest_tau_gen : Forest_Functor_H Forest_gen --> Forest_gen := SigmaMonoid_τ θForest σ.
 
-Definition app_source_gen (n : nat) : sortToSet2 :=
-  ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort SET TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort Forest_Sig (inr n)) Forest_gen.
+Definition app_source_gen (l : list otype) (p : atom) : sortToSet2 :=
+  ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort SET TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort Forest_Sig (inr (l ,,  p))) Forest_gen.
 
-Definition app_source_gen_newstyle_zero : sortToSet2 :=
-  functor_compose Forest_gen (projSortToSet sv ∙ hat_functorSet st).
-
-
-Definition app_source_gen_newstyle_nonzero_aux (n : nat) : sortToSet2 :=
-   nat_rect (fun _ =>  sortToSet2)
-     (functor_compose Forest_gen (projSortToSet se ∙ hat_functorSet st))
-     (fun _ IHn => BinProduct_of_functors BPsortToSet
-                  (functor_compose Forest_gen (projSortToSet se ∙
-hat_functorSet st)) IHn) n.
-
-Definition app_source_gen_newstyle_nonzero (n : nat) : sortToSet2 :=
-      BinProduct_of_functors BPsortToSet
-        (functor_compose Forest_gen (projSortToSet sv ∙ hat_functorSet st))
-        (app_source_gen_newstyle_nonzero_aux n).
-
-
-Lemma app_source_gen_nonzero_eq (n : nat):
-   app_source_gen (S n) = BinProduct_of_functors BPsortToSet
-     (functor_compose Forest_gen (projSortToSet sv ∙ hat_functorSet st))
-(ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized
-sort Hsort SET TerminalHSET BinProductsHSET BinCoproductsHSET
-CoproductsHSET ((n_list_sorts st (S n),,se)) Forest_gen).
-Proof.
-   apply idpath.
-Qed.
-
-Lemma app_source_gen_newstyle_nonzero_aux_eq (n : nat):
-   app_source_gen_newstyle_nonzero_aux n =
-ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort
-Hsort SET TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET
-((n_list_sorts st (S n),,se)) Forest_gen.
-Proof.
-   induction n.
-   - apply idpath.
-   - change (app_source_gen_newstyle_nonzero_aux (S n)) with
-       (BinProduct_of_functors BPsortToSet
-       (functor_compose Forest_gen (projSortToSet se ∙ hat_functorSet st))
-       (app_source_gen_newstyle_nonzero_aux n)).
-     rewrite IHn.
-     apply idpath.
-Qed.
-
-
-Lemma app_source_zero_gen_ok : app_source_gen_newstyle_zero = app_source_gen 0.
-Proof.
-  apply idpath.
-Qed.
-
-Lemma app_source_nonzero_gen_ok (n : nat) : app_source_gen_newstyle_nonzero n = app_source_gen (S n).
-Proof.
-   unfold app_source_gen_newstyle_nonzero.
-   rewrite app_source_gen_newstyle_nonzero_aux_eq.
-   apply idpath.
-Qed.
-
-Definition app_map_gen (n : nat) : sortToSet2⟦app_source_gen n,Forest_gen⟧.
-  Proof.
-    exact (CoproductIn _ _ (Coproducts_functor_precat _ _ _ _ (λ _ , _ )) (inr n) · Forest_tau_gen) .
-  Defined.
-
-Definition app_map_gen_natural (n : nat) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
-    : # (pr1 (app_source_gen n)) f · pr1 (app_map_gen n) ξ' = pr1 (app_map_gen n) ξ · # (pr1 Forest_gen) f
-    := nat_trans_ax (app_map_gen n) ξ ξ' f.
-
-Lemma app_map_gen_natural_pointwise (n : nat) (ξ ξ' : sortToSet) (f : sortToSet  ⟦ ξ, ξ' ⟧) (u : sort) :
-  pr1 (# (pr1 (app_source_gen n)) f) u · pr1 (pr1 (app_map_gen n) ξ') u =
-  pr1 (pr1 (app_map_gen n) ξ) u · pr1 (# (pr1 Forest_gen) f) u.
-Proof.
-   apply (nat_trans_eq_weq HSET _ _ (app_map_gen_natural n ξ ξ' f)).
-Qed.
-
-Lemma app_map_gen_natural_ppointwise (n : nat) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
-    (u : sort) (elem : pr1 (pr1 (pr1 (app_source_gen n) ξ) u)) :
-    pr1 (pr1 (app_map_gen n) ξ') u (pr1 (# (pr1 (app_source_gen n)) f) u elem) =
-      pr1 (# (pr1 Forest_gen) f) u (pr1 (pr1 (app_map_gen n) ξ) u elem).
-  Proof.
-    apply (toforallpaths _ _ _ (app_map_gen_natural_pointwise n ξ ξ' f u)).
-  Qed.
-
-Definition lam_source_gen_newstyle :  sortToSet2 :=
-    functor_compose
-      (functor_compose
-         (sorted_option_functorSet sv)
-         Forest_gen)
-      (projSortToSet st ∙ hat_functorSet st).
-
-Definition lam_source_gen : sortToSet2 :=
+Definition lam_source_gen (a b : otype) : sortToSet2 :=
   ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort SET TerminalHSET
-      BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort Forest_Sig (inl (inl tt ))) Forest_gen.
+      BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort Forest_Sig (inl (inl (a ,, b) ))) Forest_gen.
 
-Lemma lam_source_ok : lam_source_gen = lam_source_gen_newstyle.
-Proof.
-  apply idpath.
-Qed.
+Definition lam_map_gen (a b : otype) : sortToSet2⟦lam_source_gen a b,Forest_gen⟧ :=
+    CoproductIn _ _ (Coproducts_functor_precat _ _ _ _ (λ _, _)) (inl (inl (a ,, b) )) · Forest_tau_gen.
 
-Definition lam_map_gen : sortToSet2⟦lam_source_gen ,Forest_gen⟧ :=
-    CoproductIn _ _ (Coproducts_functor_precat _ _ _ _ (λ _, _)) (inl (inl tt)) · Forest_tau_gen.
+Definition lam_map_gen_natural (a b : otype) (ξ ξ' : sortToSet) (f :  sortToSet ⟦ ξ, ξ' ⟧)
+  : # (pr1 (lam_source_gen a b)) f · pr1 (lam_map_gen a b) ξ' = (pr1 (lam_map_gen a b) ξ) · # (pr1 Forest_gen) f
+  := nat_trans_ax (lam_map_gen a b) ξ ξ' f.
 
-Definition lam_map_gen_natural (ξ ξ' : sortToSet) (f :  sortToSet ⟦ ξ, ξ' ⟧)
-  : # (pr1 lam_source_gen) f · pr1 lam_map_gen ξ' = (pr1 lam_map_gen ξ) · # (pr1 Forest_gen) f
-  := nat_trans_ax lam_map_gen ξ ξ' f.
-
-Lemma lam_map_gen_natural_pointwise (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧) (u : sort)
-    : pr1 (# (pr1 lam_source_gen) f) u · pr1 (pr1 lam_map_gen ξ') u =
-        pr1 (pr1 lam_map_gen ξ) u · pr1 (# (pr1 Forest_gen) f) u.
+Lemma lam_map_gen_natural_pointwise (a b : otype) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧) (u : sort)
+    : pr1 (# (pr1 (lam_source_gen a b)) f) u · pr1 (pr1 (lam_map_gen a b) ξ') u =
+        pr1 (pr1 (lam_map_gen a b) ξ) u · pr1 (# (pr1 Forest_gen) f) u.
   Proof.
-    apply (nat_trans_eq_weq HSET _ _ (lam_map_gen_natural ξ ξ' f)).
+    apply (nat_trans_eq_weq HSET _ _ ((lam_map_gen_natural a b) ξ ξ' f)).
   Qed.
 
-Lemma lam_map_gen_natural_ppointwise (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
-    (u : sort) (elem : pr1 (pr1 (pr1 lam_source_gen ξ) u)) :
-    pr1 (pr1 lam_map_gen ξ') u (pr1 (# (pr1 lam_source_gen) f) u elem) =
-      pr1 (# (pr1 Forest_gen) f) u (pr1 (pr1 lam_map_gen ξ) u elem).
+Lemma lam_map_gen_natural_ppointwise (a b : otype) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
+    (u : sort) (elem : pr1 (pr1 (pr1 (lam_source_gen a b) ξ) u)) :
+    pr1 (pr1 (lam_map_gen a b) ξ') u (pr1 (# (pr1 (lam_source_gen a b)) f) u elem) =
+      pr1 (# (pr1 Forest_gen) f) u (pr1 (pr1 (lam_map_gen a b) ξ) u elem).
   Proof.
-    apply (toforallpaths _ _ _ (lam_map_gen_natural_pointwise ξ ξ' f u)).
+    apply (toforallpaths _ _ _ ((lam_map_gen_natural_pointwise a b )ξ ξ' f u)).
 Qed.
 
-Definition sum_source_gen (n : nat) : sortToSet2 :=
-    ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort SET TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort Forest_Sig (inl (inr n))) Forest_gen.
-
-Definition sum_source_gen_newstyle_zero : sortToSet2 :=
-  functor_compose TsortToSetSet (hat_functorSet st).
-
-Definition sum_source_gen_newstyle_nonzero (n : nat) : sortToSet2 :=
-  nat_rect (fun _ =>  sortToSet2)
-  (functor_compose Forest_gen (projSortToSet se ∙ hat_functorSet st))
-  (fun _ IHn => BinProduct_of_functors BPsortToSet
-    (functor_compose Forest_gen (projSortToSet se ∙ hat_functorSet st)) IHn) n.
-
-Lemma sum_source_zero_gen_ok : sum_source_gen_newstyle_zero = sum_source_gen 0.
-Proof.
-   apply idpath.
-Qed.
-
-Lemma sum_source_gen_nonzero_eq (n : nat) :
-  sum_source_gen n = ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort
-Hsort SET TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET
-((n_list_sorts se n,,st)) Forest_gen.
-Proof.
-  induction n.
-  -apply idpath.
-  -change (sum_source_gen (S n)) with
-     (BinProduct_of_functors BPsortToSet
-        (functor_compose Forest_gen (projSortToSet se ∙ hat_functorSet st))
-        (sum_source_gen_newstyle_nonzero n)).
-
-   (*
-     Le code bloque à cet endroit.
-    *)
-
-
-Lemma sum_source_nonzero_gen_ok (n : nat) : sum_source_gen_newstyle_nonzero n = sum_source_gen n.
-Proof.
-  unfold sum_source_gen_newstyle_nonzero.
-  rewrite sum_source_gen_newstyle_aux
-
-Definition sum_map_gen (n : nat) : sortToSet2⟦sum_source_gen n,Forest_gen⟧.
-  Proof.
-    exact (CoproductIn _ _ (Coproducts_functor_precat _ _ _ _ (λ _ , _ )) (inl (inr n)) · Forest_tau_gen) .
-  Defined.
-
-Definition sum_map_gen_natural (n : nat) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
-    : # (pr1 (sum_source_gen n)) f · pr1 (sum_map_gen n) ξ' = pr1 (sum_map_gen n) ξ · # (pr1 Forest_gen) f
-    := nat_trans_ax (sum_map_gen n) ξ ξ' f.
-
-Lemma sum_map_gen_natural_pointwise (n : nat) (ξ ξ' : sortToSet) (f : sortToSet  ⟦ ξ, ξ' ⟧) (u : sort) :
-  pr1 (# (pr1 (sum_source_gen n)) f) u · pr1 (pr1 (sum_map_gen n) ξ') u =
-  pr1 (pr1 (sum_map_gen n) ξ) u · pr1 (# (pr1 Forest_gen) f) u.
-Proof.
-   apply (nat_trans_eq_weq HSET _ _ (sum_map_gen_natural n ξ ξ' f)).
-Qed.
-
-Lemma sum_map_gen_natural_ppointwise (n : nat) (ξ ξ' : sortToSet) (f : sortToSet ⟦ ξ, ξ' ⟧)
-    (u : sort) (elem : pr1 (pr1 (pr1 (sum_source_gen n) ξ) u)) :
-    pr1 (pr1 (sum_map_gen n) ξ') u (pr1 (# (pr1 (sum_source_gen n)) f) u elem) =
-      pr1 (# (pr1 Forest_gen) f) u (pr1 (pr1 (sum_map_gen n) ξ) u elem).
-  Proof.
-    apply (toforallpaths _ _ _ (sum_map_gen_natural_pointwise n ξ ξ' f u)).
-  Qed.
-
+Definition sum_source_gen (p : atom) (n : nat) : sortToSet2 :=
+    ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort Hsort SET TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET (arity sort Forest_Sig (inl (inr (p ,, n)))) Forest_gen.
 
 End IndAndCoind.
 
