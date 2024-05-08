@@ -312,10 +312,28 @@ Definition sum_source_gen_newstyle_nonzero (n : nat) : sortToSet2 :=
   (fun _ IHn => BinProduct_of_functors BPsortToSet
     (functor_compose UntypedForest_gen (projSortToSet se ∙ hat_functorSet st)) IHn) n.
 
+Lemma sum_source_gen_nonzero_eq (n : nat) :
+  sum_source_gen_newstyle_nonzero (S n) = BinProduct_of_functors BPsortToSet
+     (functor_compose UntypedForest_gen (projSortToSet se ∙ hat_functorSet st))
+(ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized
+sort Hsort SET TerminalHSET BinProductsHSET BinCoproductsHSET
+CoproductsHSET ((functionToList  (S n)  (fun _ => ([] ,, se)),,st)) UntypedForest_gen).
+Proof.
+  induction n.
+  -apply idpath.
+  -change (sum_source_gen_newstyle_nonzero (S (S n))) with
+     (BinProduct_of_functors BPsortToSet
+       (functor_compose UntypedForest_gen (projSortToSet se ∙ hat_functorSet st))
+       (sum_source_gen_newstyle_nonzero (S n))).
+   rewrite IHn.
+   apply idpath.
+Qed.
+
 Lemma sum_source_zero_gen_ok : sum_source_gen_newstyle_zero = sum_source_gen 0.
 Proof.
    apply idpath.
 Qed.
+
 
 Definition sum_map_gen (n : nat) : sortToSet2⟦sum_source_gen n,UntypedForest_gen⟧.
   Proof.
