@@ -255,6 +255,38 @@ Proof.
   exact (CoproductIn _ _ (Coproducts_functor_precat _ _ _ _ (λ _ , _ )) (inl (inr (p ,, n))) · Forest_tau_gen).
 Defined.
 
+Section Church_int.
+
+  (* The goal fo the following section is to define church integers, and church infinity. We view a as an atom, but use a' for the definitions (since an atom is a type) *)
+
+  Context (a : atom).
+
+  Definition a' : otype := atotype a.
+
+  (* Version non sûre : je ne suis pas certain des catégories syntaxiques données dans les "change". Je me rendrai compte de s'il faut les changer plus tard dans le travail, certainement. *)
+  Definition ChurchZero_gen (ξ : sortToSet) : Forest_gen_ctx_sort ξ ((((a' ⇒  a') ⇒ (a' ⇒ a')) ,, st)).
+  Proof.
+    refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
+    exists (idpath _).
+    change (Forest_gen_ctx_sort (ctx_ext ξ ((a' ⇒ a') ,, st )) ((a' ⇒ a') ,, st)).
+    refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
+    exists (idpath _).
+    change (Forest_gen_ctx_sort (ctx_ext (ctx_ext ξ ((a' ⇒ a') ,, st)) (a' ,, sv)) (a' ,, sv)).
+    simple refine (pr1 (pr1 Forest_eta_gen _) _ _).
+    cbn.
+    apply ii1.
+    exists (idpath _).
+    exact tt.
+  Defined.
+
+  Definition ChurchOne_gen (ξ : sortToSet) :  Forest_gen_ctx_sort ξ ((((a' ⇒  a') ⇒ (a' ⇒ a')) ,, st)).
+  Proof.
+    refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
+    exists (idpath _).
+    refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
+    exists (idpath _).
+    refine (pr1 (pr1 (app_map_gen (a' :: nil) _) _) _ _).
+    split; exists (idpath _).
 End IndAndCoind.
 
 End Signature.
