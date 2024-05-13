@@ -268,10 +268,10 @@ Section Church_int.
   Proof.
     refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
     exists (idpath _).
-    change (Forest_gen_ctx_sort (ctx_ext ξ ((a' ⇒ a') ,, st )) ((a' ⇒ a') ,, st)).
+    change (Forest_gen_ctx_sort (ctx_ext ξ ((a' ⇒ a') ,, sv )) ((a' ⇒ a') ,, st)).
     refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
     exists (idpath _).
-    change (Forest_gen_ctx_sort (ctx_ext (ctx_ext ξ ((a' ⇒ a') ,, st)) (a' ,, sv)) (a' ,, sv)).
+    change (Forest_gen_ctx_sort (ctx_ext (ctx_ext ξ ((a' ⇒ a') ,, sv)) (a' ,, sv)) (a' ,, st)).
     simple refine (pr1 (pr1 Forest_eta_gen _) _ _).
     cbn.
     apply ii1.
@@ -287,6 +287,12 @@ Section Church_int.
     exists (idpath _).
     refine (pr1 (pr1 (app_map_gen (a' :: nil) _) _) _ _).
     split; exists (idpath _).
+    - change (Forest_gen_ctx_sort (ctx_ext (ctx_ext ξ ((a' ⇒ a') ,, sv)) ( a' ,, sv)) ((a' ⇒ a') ,, st)).
+      (* ne prouve plus à cet endroit
+
+
+End Church_int.
+
 End IndAndCoind.
 
 End Signature.
