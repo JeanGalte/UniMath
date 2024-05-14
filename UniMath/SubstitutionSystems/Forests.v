@@ -127,17 +127,17 @@ Qed.
 
 Definition otype_list_as_set := (list otype ,, otype_list_set).
 
-Definition wrap_sig_app : otype -> (list sort × sort).
+Lemma  wrap_sig_app : otype -> (list sort × sort).
 Proof.
   intros t.
   exact ([] ,, (t ,, st)).
-Qed.
+Defined.
 
-Definition sig_app_var_otype : atom ->  list otype -> otype.
+Lemma  sig_app_var_otype : atom ->  list otype -> otype.
 Proof.
   intros p l.
   exact (foldr arr (atotype p) l).
-Qed.
+Defined.
 
 Definition Forest_Sig : MultiSortedSig sort.
 Proof.
@@ -268,10 +268,10 @@ Section Church_int.
   Proof.
     refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
     exists (idpath _).
-    change (Forest_gen_ctx_sort (ctx_ext ξ ((a' ⇒ a') ,, sv )) ((a' ⇒ a') ,, st)).
+    change (Forest_gen_ctx_sort (ctx_ext ξ ((a' ⇒ a') ,, sv )) ((a' ⇒ a') ,, sv)).
     refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
     exists (idpath _).
-    change (Forest_gen_ctx_sort (ctx_ext (ctx_ext ξ ((a' ⇒ a') ,, sv)) (a' ,, sv)) (a' ,, st)).
+    change (Forest_gen_ctx_sort (ctx_ext (ctx_ext ξ ((a' ⇒ a') ,, sv)) (a' ,, sv)) (a' ,, sv)).
     simple refine (pr1 (pr1 Forest_eta_gen _) _ _).
     cbn.
     apply ii1.
@@ -285,10 +285,49 @@ Section Church_int.
     exists (idpath _).
     refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
     exists (idpath _).
-    refine (pr1 (pr1 (app_map_gen (a' :: nil) _) _) _ _).
-    split; exists (idpath _).
-    - change (Forest_gen_ctx_sort (ctx_ext (ctx_ext ξ ((a' ⇒ a') ,, sv)) ( a' ,, sv)) ((a' ⇒ a') ,, st)).
-      (* ne prouve plus à cet endroit
+    refine (pr1 (pr1 (app_map_gen (a' :: nil)  a) _) _ _).
+    split. exists (idpath _).
+    - change (Forest_gen_ctx_sort (ctx_ext (ctx_ext ξ ((a' ⇒ a') ,, sv)) (a' ,, sv)) ((a' ⇒ a') ,, sv)).
+      simple refine (pr1 (pr1 Forest_eta_gen _) _ _).
+      cbn.
+      apply ii2 ; apply ii1.
+      exists (idpath _).
+      exact tt.
+    -
+      (*
+         Le goal est trop différent de ce que j'ai vu jusqu'à présent pour faire un "change" directement
+       *)
+
+      admit.
+  Admitted.
+
+(*
+  figure ici à titre d'exemple uniquement
+
+  Definition n_list (n : nat) : list otype.
+  Proof.
+    induction n.
+    - exact nil.
+    - exact (a' :: IHn).
+  Defined.
+
+Même avec cette définition inductive, le "split" ne passe pas. Pourtant, le plit passe sur des exemples définis de la même façon :
+
+ *)
+
+
+  Definition Church_gen_body (n : nat) (ξ : sortToSet) : Forest_gen_ctx_sort (ctx_ext (ctx_ext ξ ((a' ⇒ a') ,, sv)) (a' ,, sv)) (a' ,, st).
+  Proof.
+    induction n.
+    - simple refine (pr1 (pr1 Forest_eta_gen _) _ _).
+      cbn.
+      apply ii1.
+      exists (idpath _).
+      exact tt.
+    - refine (pr1 (pr1 (app_map_gen (functionToList n (fun _ => a') )  _) _) _ _).
+       split.
+      (* bloque ici avec functionToList, ET avec n_list *)
+
 
 
 End Church_int.
