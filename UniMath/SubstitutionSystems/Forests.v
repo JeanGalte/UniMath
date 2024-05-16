@@ -286,35 +286,20 @@ Section Church_int.
     refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
     exists (idpath _).
     refine (pr1 (pr1 (app_map_gen (a' :: nil)  a) _) _ _).
-    split. exists (idpath _).
+    split ; exists (idpath _).
     - change (Forest_gen_ctx_sort (ctx_ext (ctx_ext ξ ((a' ⇒ a') ,, sv)) (a' ,, sv)) ((a' ⇒ a') ,, sv)).
       simple refine (pr1 (pr1 Forest_eta_gen _) _ _).
       cbn.
       apply ii2 ; apply ii1.
       exists (idpath _).
       exact tt.
-    -
-      (*
-         Le goal est trop différent de ce que j'ai vu jusqu'à présent pour faire un "change" directement
-       *)
-
-      admit.
-  Admitted.
-
-(*
-  figure ici à titre d'exemple uniquement
-
-  Definition n_list (n : nat) : list otype.
-  Proof.
-    induction n.
-    - exact nil.
-    - exact (a' :: IHn).
+    - change (Forest_gen_ctx_sort (ctx_ext (ctx_ext ξ ((a' ⇒ a') ,, sv)) (a' ,, sv)) (a' ,, sv)).
+      simple refine (pr1 (pr1 Forest_eta_gen _) _ _).
+      cbn.
+      apply ii1.
+      exists (idpath _).
+      exact tt.
   Defined.
-
-Même avec cette définition inductive, le "split" ne passe pas. Pourtant, le plit passe sur des exemples définis de la même façon :
-
- *)
-
 
   Definition Church_gen_body (n : nat) (ξ : sortToSet) : Forest_gen_ctx_sort (ctx_ext (ctx_ext ξ ((a' ⇒ a') ,, sv)) (a' ,, sv)) (a' ,, st).
   Proof.
@@ -324,10 +309,42 @@ Même avec cette définition inductive, le "split" ne passe pas. Pourtant, le pl
       apply ii1.
       exists (idpath _).
       exact tt.
-    - refine (pr1 (pr1 (app_map_gen (functionToList n (fun _ => a') )  _) _) _ _).
-       split.
-      (* bloque ici avec functionToList, ET avec n_list *)
+    - refine (pr1 (pr1 (app_map_gen (a' :: [] )  _) _) _ _).
+       split ; exists (idpath _).
+       + change (Forest_gen_ctx_sort (ctx_ext (ctx_ext ξ ((a' ⇒ a') ,, sv)) (a' ,, sv)) ((a' ⇒ a') ,, sv)).
+         simple refine (pr1 (pr1 Forest_eta_gen _) _ _).
+         cbn.
+         apply ii2.
+         apply ii1.
+         exists (idpath _).
+         exact tt.
+       + exact IHn.
+  Defined.
 
+  Lemma Church_gen_body_rec_eq (n : nat) (ξ : sortToSet) :
+   Church_gen_body (S n) ξ =
+      pr1 (pr1 (app_map_gen (a' :: []) a) (ctx_ext (ctx_ext ξ ((a' ⇒ a'),, sv)) (a',, sv))) (a',, st)
+      ((idpath (atotype a,, se),,
+        pr1 (pr1 Forest_eta_gen (ctx_ext (ctx_ext ξ ((a' ⇒ a'),, sv)) (a',, sv))) ((a' ⇒ a'),, sv)
+        (inr (inl (idpath ((a' ⇒ a'),, sv),, tt)) : pr1 (pr1 (Id (ctx_ext (ctx_ext ξ ((a' ⇒ a'),, sv)) (a',, sv)))
+             ((a' ⇒ a'),, sv)))),,
+        idpath (atotype a,, se),, Church_gen_body n  ξ).
+    Proof.
+      apply idpath.
+    Qed.
+
+    Definition  Church_gen_header (ξ : sortToSet) :
+      Forest_gen_ctx_sort (ctx_ext (ctx_ext ξ ((a' ⇒ a') ,, sv )) (a' ,, sv)) (a' ,, st) -> Forest_gen_ctx_sort ξ (((a' ⇒ a') ⇒ (a' ⇒ a')) ,, st ).
+      Proof.
+        intro body.
+        refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
+        exists (idpath _).
+        refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
+        exists (idpath _).
+        exact body.
+      Defined.
+
+    Definition Church_gen (n : nat) (ξ  : sortToSet) : Forest_gen_ctx_sort ξ (((a' ⇒ a') ⇒ (a' ⇒ a')) ,,st ) := Church_gen_header ξ (Church_gen_body n ξ).
 
 
 End Church_int.
