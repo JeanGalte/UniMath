@@ -373,6 +373,94 @@ Lemma sum_map_gen_natural_ppointwise (n : nat) (ξ ξ' : sortToSet) (f : sortToS
     apply (toforallpaths _ _ _ (sum_map_gen_natural_pointwise n ξ ξ' f u)).
   Qed.
 
+Section Church_int.
+
+  (* The goal fo the following section is to define church integers *)
+
+  Definition ChurchZero_gen (ξ : sortToSet) : UntypedForest_gen_ctx_sort ξ st.
+  Proof.
+    refine (pr1 (pr1 lam_map_gen _) _ _).
+    exists (idpath _).
+    change (UntypedForest_gen_ctx_sort (ctx_ext ξ sv)  sv).
+    refine (pr1 (pr1 lam_map_gen _) _ _).
+    exists (idpath _).
+    change (UntypedForest_gen_ctx_sort (ctx_ext (ctx_ext ξ  sv) sv) sv).
+    simple refine (pr1 (pr1 UntypedForest_eta_gen _) _ _).
+    cbn.
+    apply ii1.
+    exists (idpath _).
+    exact tt.
+  Defined.
+
+  Definition ChurchOne_gen (ξ : sortToSet) :  UntypedForest_gen_ctx_sort ξ st.
+  Proof.
+    refine (pr1 (pr1 lam_map_gen _) _ _).
+    exists (idpath _).
+    refine (pr1 (pr1 lam_map_gen _) _ _).
+    exists (idpath _).
+    refine (pr1 (pr1 (app_map_gen 1) _) _ _).
+    split ; exists (idpath _).
+    - change (UntypedForest_gen_ctx_sort (ctx_ext (ctx_ext ξ  sv)  sv)  sv).
+      simple refine (pr1 (pr1 UntypedForest_eta_gen _) _ _).
+      cbn.
+      apply ii2 ; apply ii1.
+      exists (idpath _).
+      exact tt.
+    - change (UntypedForest_gen_ctx_sort (ctx_ext (ctx_ext ξ sv) sv) sv).
+      simple refine (pr1 (pr1 UntypedForest_eta_gen _) _ _).
+      cbn.
+      apply ii1.
+      exists (idpath _).
+      exact tt.
+  Defined.
+
+  Definition Church_gen_body (n : nat) (ξ : sortToSet) : UntypedForest_gen_ctx_sort (ctx_ext (ctx_ext ξ  sv)  sv)  st.
+  Proof.
+    induction n.
+    - simple refine (pr1 (pr1 UntypedForest_eta_gen _) _ _).
+      cbn.
+      apply ii1.
+      exists (idpath _).
+      exact tt.
+    - refine (pr1 (pr1 (app_map_gen 1) _) _ _).
+       split ; exists (idpath _).
+       + change (UntypedForest_gen_ctx_sort (ctx_ext (ctx_ext ξ  sv)  sv)  sv).
+         simple refine (pr1 (pr1 UntypedForest_eta_gen _) _ _).
+         cbn.
+         apply ii2.
+         apply ii1.
+         exists (idpath _).
+         exact tt.
+       + exact IHn.
+  Defined.
+
+  Lemma Church_gen_body_rec_eq (n : nat) (ξ : sortToSet) :
+   Church_gen_body (S n) ξ =
+      pr1 (pr1 (app_map_gen 1) (ctx_ext (ctx_ext ξ  sv) sv))  st
+      ((idpath se,,
+        pr1 (pr1 UntypedForest_eta_gen (ctx_ext (ctx_ext ξ  sv) sv)) sv
+        (inr (inl (idpath sv,, tt)) : pr1 (pr1 (Id (ctx_ext (ctx_ext ξ  sv) sv))
+              sv))),,
+        idpath se,, Church_gen_body n  ξ).
+    Proof.
+      apply idpath.
+    Qed.
+
+    Definition  Church_gen_header (ξ : sortToSet) :
+      UntypedForest_gen_ctx_sort (ctx_ext (ctx_ext ξ  sv) sv) st -> UntypedForest_gen_ctx_sort ξ st.
+      Proof.
+        intro body.
+        refine (pr1 (pr1 lam_map_gen _) _ _).
+        exists (idpath _).
+        refine (pr1 (pr1 lam_map_gen _) _ _).
+        exists (idpath _).
+        exact body.
+      Defined.
+
+    Definition Church_gen (n : nat) (ξ  : sortToSet) : UntypedForest_gen_ctx_sort ξ st := Church_gen_header ξ (Church_gen_body n ξ).
+
+
+End Church_int.
 
 End IndAndCoind.
 
