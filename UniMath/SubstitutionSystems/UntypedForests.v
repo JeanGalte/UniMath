@@ -313,10 +313,10 @@ Definition sum_source_gen_newstyle_nonzero (n : nat) : sortToSet2 :=
     (functor_compose UntypedForest_gen (projSortToSet se ∙ hat_functorSet st)) IHn) n.
 
 Lemma sum_source_gen_nonzero_eq (n : nat):
-   sum_source_gen (S n) =
+   sum_source_gen  n =
 (ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized
 sort Hsort SET TerminalHSET BinProductsHSET BinCoproductsHSET
-CoproductsHSET ((functionToList (S n)  (fun _ => ([] ,, se)),,st)) UntypedForest_gen).
+CoproductsHSET ((functionToList  n  (fun _ => ([] ,, se)),,st)) UntypedForest_gen).
 Proof.
    apply idpath.
 Qed.
