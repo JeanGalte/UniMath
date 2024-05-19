@@ -390,7 +390,7 @@ Definition UntypedForest_ind_IA : Initial (FunctorAlg Forest_Functor_Id_H)
 (** notice that this is only the initial algebra and not the initial sigma monoid *)
 
 (** the final coalgebra *)
-Definition STLC_coind_FC : Terminal (CoAlg_category Forest_Functor_Id_H)
+Definition Forest_coind_FC : Terminal (CoAlg_category Forest_Functor_Id_H)
   := coindCodatatypeOfMultisortedBindingSig_CAT sort Hsort HSET TerminalHSET
          BinProductsHSET BinCoproductsHSET CoproductsHSET (LimsHSET_of_shape conat_graph)
          I_coproduct_distribute_over_omega_limits_HSET Forest_Sig is_univalent_HSET.

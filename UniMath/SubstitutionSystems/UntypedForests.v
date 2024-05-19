@@ -464,4 +464,49 @@ End Church_int.
 
 End IndAndCoind.
 
+Definition UntypedForest_ctx_sort_ind (ξ : sortToSet) (s : sort) : UU := UntypedForest_gen_ctx_sort σind ξ s.
+
+Definition UntypedForest_ctx_sort_coind (ξ : sortToSet) (s : sort) : UU := UntypedForest_gen_ctx_sort σcoind ξ s.
+
+Definition UntypedForest_ind : sortToSet2 := UntypedForest_gen σind.
+Definition UntypedForest_coind : sortToSet2 := UntypedForest_gen σcoind.
+
+Definition UntypedForest_eta_ind : sortToSet2⟦Id,UntypedForest_ind⟧ := UntypedForest_eta_gen σind.
+Definition UntypedForest_eta_coind : sortToSet2⟦Id,UntypedForest_coind⟧ := UntypedForest_eta_gen σcoind.
+
+Definition UntypedForest_tau_ind : UntypedForest_Functor_H UntypedForest_ind --> UntypedForest_ind  := SigmaMonoid_τ θUntypedForest σind.
+Definition UntypedForest_tau_coind : UntypedForest_Functor_H UntypedForest_coind --> UntypedForest_coind  := SigmaMonoid_τ θUntypedForest σcoind.
+
+Definition app_source_ind (n : nat) : sortToSet2 := app_source_gen σind n.
+Definition app_map_ind (n : nat)  : sortToSet2⟦app_source_ind n, UntypedForest_ind⟧ := app_map_gen σind n.
+Definition lam_source_ind : sortToSet2 := lam_source_gen σind.
+Definition lam_map_ind : sortToSet2⟦lam_source_ind, UntypedForest_ind⟧ := lam_map_gen σind.
+Definition sum_source_ind (n : nat) : sortToSet2 := sum_source_gen σind n.
+Definition sum_map_ind (n : nat) : sortToSet2⟦sum_source_ind n, UntypedForest_ind⟧ := sum_map_gen σind n.
+
+Definition app_source_coind (n : nat) : sortToSet2 := app_source_gen σcoind n.
+Definition app_map_coind  (n : nat) : sortToSet2⟦app_source_coind n, UntypedForest_coind⟧ := app_map_gen σcoind n.
+Definition lam_source_coind : sortToSet2 := lam_source_gen σcoind.
+Definition lam_map_coind : sortToSet2⟦lam_source_coind, UntypedForest_coind⟧ := lam_map_gen σcoind.
+Definition sum_source_coind (n : nat) : sortToSet2 := sum_source_gen σcoind n.
+Definition sum_map_coind (n : nat) : sortToSet2⟦sum_source_coind n, UntypedForest_coind⟧ := sum_map_gen σcoind n.
+
+(** get a handle on the recursion principles *)
+
+(** the initial algebra *)
+Definition UntypedForest_ind_IA : Initial (FunctorAlg UntypedForest_Functor_Id_H)
+  := DatatypeOfMultisortedBindingSig_CAT sort Hsort SET TerminalHSET InitialHSET BinProductsHSET
+       BinCoproductsHSET (fun s s' => ProductsHSET (s=s')) CoproductsHSET (EsortToSet2 sort Hsort)
+       (ColimsHSET_of_shape nat_graph) UntypedForest_Sig.
+(** notice that this is only the initial algebra and not the initial sigma monoid *)
+
+(** the final coalgebra *)
+Definition UntypedForest_coind_FC : Terminal (CoAlg_category UntypedForest_Functor_Id_H)
+  := coindCodatatypeOfMultisortedBindingSig_CAT sort Hsort HSET TerminalHSET
+         BinProductsHSET BinCoproductsHSET CoproductsHSET (LimsHSET_of_shape conat_graph)
+         I_coproduct_distribute_over_omega_limits_HSET UntypedForest_Sig is_univalent_HSET.
+
+
+
+
 End Signature.
