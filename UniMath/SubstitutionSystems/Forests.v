@@ -257,13 +257,12 @@ Defined.
 
 Section Church_int.
 
-  (* The goal fo the following section is to define church integers, and church infinity. We view a as an atom, but use a' for the definitions (since an atom is a type) *)
+  (* The goal fo the following section is to define Church integers. We view a as an atom, but use a' for the definitions (since an atom is a type) *)
 
   Context (a : atom).
 
   Definition a' : otype := atotype a.
 
-  (* Version non sûre : je ne suis pas certain des catégories syntaxiques données dans les "change". Je me rendrai compte de s'il faut les changer plus tard dans le travail, certainement. *)
   Definition ChurchZero_gen (ξ : sortToSet) : Forest_gen_ctx_sort ξ ((((a' ⇒  a') ⇒ (a' ⇒ a')) ,, st)).
   Proof.
     refine (pr1 (pr1 (lam_map_gen _ _) _) _ _).
@@ -350,5 +349,51 @@ Section Church_int.
 End Church_int.
 
 End IndAndCoind.
+
+Definition Forest_ctx_sort_ind (ξ : sortToSet) (s : sort) : UU := Forest_gen_ctx_sort σind ξ s.
+
+Definition Forest_ctx_sort_coind (ξ : sortToSet) (s : sort) : UU := Forest_gen_ctx_sort σcoind ξ s.
+
+Definition Forest_ind : sortToSet2 := Forest_gen σind.
+Definition Forest_coind : sortToSet2 := Forest_gen σcoind.
+
+Definition Forest_eta_ind : sortToSet2⟦Id,Forest_ind⟧ := Forest_eta_gen σind.
+Definition Forest_eta_coind : sortToSet2⟦Id, Forest_coind⟧ := Forest_eta_gen σcoind.
+
+Definition Forest_tau_ind : Forest_Functor_H Forest_ind --> Forest_ind  := SigmaMonoid_τ θForest σind.
+Definition Forest_tau_coind : Forest_Functor_H Forest_coind --> Forest_coind  := SigmaMonoid_τ θForest σcoind.
+
+Definition app_source_ind (l : list  otype) (p : atom) : sortToSet2 := app_source_gen σind l p.
+Definition app_map_ind (l : list otype) (p : atom)  : sortToSet2⟦app_source_ind l p, Forest_ind⟧ := app_map_gen σind l p.
+Definition lam_source_ind (s t : otype) : sortToSet2 := lam_source_gen σind s t.
+Definition lam_map_ind (s t : otype) : sortToSet2⟦lam_source_ind s t, Forest_ind⟧ := lam_map_gen σind s t.
+Definition sum_source_ind (p : atom) (n : nat) : sortToSet2 := sum_source_gen σind p n.
+Definition sum_map_ind (p : atom) (n : nat) : sortToSet2⟦sum_source_ind p n, Forest_ind⟧  := sum_map_gen σind p n.
+
+
+
+Definition app_source_coind (l :  list otype) (p : atom) : sortToSet2 := app_source_gen σcoind l p.
+Definition app_map_coind  (l : list otype) (p : atom) : sortToSet2⟦app_source_coind l p, Forest_coind⟧ := app_map_gen σcoind l p.
+Definition lam_source_coind (s t : otype) : sortToSet2 := lam_source_gen σcoind s t.
+Definition lam_map_coind (s t : otype) : sortToSet2⟦lam_source_coind s t, Forest_coind⟧ := lam_map_gen σcoind s t.
+Definition sum_source_coind (p : atom) (n : nat) : sortToSet2 := sum_source_gen σcoind p n.
+Definition sum_map_coind (p : atom) (n : nat) : sortToSet2⟦sum_source_coind p n, Forest_coind⟧  := sum_map_gen σcoind p n.
+
+
+(** get a handle on the recursion principles *)
+
+(** the initial algebra *)
+Definition UntypedForest_ind_IA : Initial (FunctorAlg Forest_Functor_Id_H)
+  := DatatypeOfMultisortedBindingSig_CAT sort Hsort SET TerminalHSET InitialHSET BinProductsHSET
+       BinCoproductsHSET (fun s s' => ProductsHSET (s=s')) CoproductsHSET (EsortToSet2 sort Hsort)
+       (ColimsHSET_of_shape nat_graph) Forest_Sig.
+(** notice that this is only the initial algebra and not the initial sigma monoid *)
+
+(** the final coalgebra *)
+Definition STLC_coind_FC : Terminal (CoAlg_category Forest_Functor_Id_H)
+  := coindCodatatypeOfMultisortedBindingSig_CAT sort Hsort HSET TerminalHSET
+         BinProductsHSET BinCoproductsHSET CoproductsHSET (LimsHSET_of_shape conat_graph)
+         I_coproduct_distribute_over_omega_limits_HSET Forest_Sig is_univalent_HSET.
+
 
 End Signature.
