@@ -52,6 +52,7 @@ Require Import UniMath.SubstitutionSystems.MultiSortedMonadConstruction_coind_ac
 Require Import UniMath.SubstitutionSystems.ContinuitySignature.InstantiateHSET.
 Require Import UniMath.SubstitutionSystems.MultiSortedEmbeddingIndCoindHSET.
 Require Import UniMath.SubstitutionSystems.SortIndexing.
+Require  UniMath.SubstitutionSystems.UntypedForests.
 
 Local Open Scope cat.
 
@@ -383,7 +384,7 @@ Definition sum_map_coind (p : atom) (n : nat) : sortToSet2⟦sum_source_coind p 
 (** get a handle on the recursion principles *)
 
 (** the initial algebra *)
-Definition UntypedForest_ind_IA : Initial (FunctorAlg Forest_Functor_Id_H)
+Definition Forest_ind_IA : Initial (FunctorAlg Forest_Functor_Id_H)
   := DatatypeOfMultisortedBindingSig_CAT sort Hsort SET TerminalHSET InitialHSET BinProductsHSET
        BinCoproductsHSET (fun s s' => ProductsHSET (s=s')) CoproductsHSET (EsortToSet2 sort Hsort)
        (ColimsHSET_of_shape nat_graph) Forest_Sig.
@@ -395,5 +396,25 @@ Definition Forest_coind_FC : Terminal (CoAlg_category Forest_Functor_Id_H)
          BinProductsHSET BinCoproductsHSET CoproductsHSET (LimsHSET_of_shape conat_graph)
          I_coproduct_distribute_over_omega_limits_HSET Forest_Sig is_univalent_HSET.
 
+Section Typing.
+
+
+Let θUntypedForest := MultiSortedMonadConstruction_actegorical.MultiSortedSigToStrength' UntypedForests.sort UntypedForests.Hsort SET
+               TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET UntypedForests.UntypedForest_Sig.
+
+Context (σu : SigmaMonoid θUntypedForest) (σt : SigmaMonoid θForest).
+
+Let σuind : SigmaMonoid θUntypedForest := MultiSortedEmbeddingIndCoindHSET.σind UntypedForests.sort  UntypedForests.Hsort UntypedForests.UntypedForest_Sig.
+
+Let σucoind : SigmaMonoid θUntypedForest := MultiSortedEmbeddingIndCoindHSET.σcoind  UntypedForests.sort  UntypedForests.Hsort  UntypedForests.UntypedForest_Sig.
+
+Definition UntypedForest_ind  : SortIndexing.sortToSet2 UntypedForests.sort UntypedForests.Hsort := UntypedForests.UntypedForest_gen σuind.
+
+Definition Detype_Forest : sortToSet2 -> (SortIndexing.sortToSet2 UntypedForests.sort UntypedForests.Hsort).
+  intros t.
+  (* Que faire dès ici ? *)
+
+
+End Typing.
 
 End Signature.
