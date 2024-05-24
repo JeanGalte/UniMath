@@ -77,9 +77,9 @@ Definition st : sort := make_stn 3 0 (idpath true : 1 < 3).
 (* elimination alternatives sort *)
 Definition se : sort := make_stn 3 0 (idpath true : 2 < 3).
 
-Let sortToSet : category := SortIndexing.sortToSet sort Hsort.
-Let sortToSetSet : category := SortIndexing.sortToSetSet sort Hsort.
-Let sortToSet2 : category := SortIndexing.sortToSet2 sort Hsort.
+Local Definition sortToSet : category := SortIndexing.sortToSet sort Hsort.
+Local Definition sortToSetSet : category := SortIndexing.sortToSetSet sort Hsort.
+Local Definition sortToSet2 : category := SortIndexing.sortToSet2 sort Hsort.
 
 Definition TsortToSetSet : Terminal sortToSetSet := TsortToCC _ Hsort HSET TerminalHSET.
 
@@ -131,15 +131,15 @@ Definition UntypedForest_Functor_Id_H : functor sortToSet2 sortToSet2 :=
   SubstitutionSystems.Id_H sortToSet BCsortToSet UntypedForest_Functor_H.
 
 (** the canonical strength associated with UntypedForest_Sig *)
-Let θUntypedForest := MultiSortedMonadConstruction_actegorical.MultiSortedSigToStrength' sort Hsort SET
+Local Definition θUntypedForest := MultiSortedMonadConstruction_actegorical.MultiSortedSigToStrength' sort Hsort SET
                TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET UntypedForest_Sig.
 
 Definition ctx_ext (ξ : sortToSet) (s : sort) : sortToSet
   := sorted_option_functorSet s ξ.
 
 (** the sigma-monoids for wellfounded and non-wellfounded syntax for UntypedForests *)
-Let σind : SigmaMonoid θUntypedForest := MultiSortedEmbeddingIndCoindHSET.σind sort Hsort UntypedForest_Sig.
-Let σcoind : SigmaMonoid θUntypedForest := MultiSortedEmbeddingIndCoindHSET.σcoind sort Hsort UntypedForest_Sig.
+Local Definition σind : SigmaMonoid θUntypedForest := MultiSortedEmbeddingIndCoindHSET.σind sort Hsort UntypedForest_Sig.
+Local Definition σcoind : SigmaMonoid θUntypedForest := MultiSortedEmbeddingIndCoindHSET.σcoind sort Hsort UntypedForest_Sig.
 
 Section IndAndCoind.
 

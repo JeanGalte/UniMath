@@ -399,21 +399,47 @@ Definition Forest_coind_FC : Terminal (CoAlg_category Forest_Functor_Id_H)
 Section Typing.
 
 
-Let θUntypedForest := MultiSortedMonadConstruction_actegorical.MultiSortedSigToStrength' UntypedForests.sort UntypedForests.Hsort SET
-               TerminalHSET BinProductsHSET BinCoproductsHSET CoproductsHSET UntypedForests.UntypedForest_Sig.
+Definition Down_Context (ξ : sortToSet)  : UntypedForests.sortToSet.
+Proof.
+  apply functor_path_pregroupoid.
+  intro s.
+  refine (CoproductsHSET otype (pr2 otype) (fun a => _)).
+  apply (pr1 ξ).
+  simpl.
+  exact (a,, s ).
+Defined.
 
-Context (σu : SigmaMonoid θUntypedForest) (σt : SigmaMonoid θForest).
+Definition Down_Context_on_mor  (ξ ξ' : sortToSet)  (η : sortToSet⟦ξ, ξ'⟧)  : UntypedForests.sortToSet⟦Down_Context ξ, Down_Context ξ'⟧.
+Proof.
+  apply nat_trans_functor_path_pregroupoid.
+  intros s.
+  apply  CoproductOfArrows.
+  intro c.
+  simpl.
+  apply η.
+Defined.
 
-Let σuind : SigmaMonoid θUntypedForest := MultiSortedEmbeddingIndCoindHSET.σind UntypedForests.sort  UntypedForests.Hsort UntypedForests.UntypedForest_Sig.
+Definition Carrier_detype_date : functor_data sortToSet sortToSet.
+Proof.
+  use make_functor_data.
+  - intros ξ.
+    apply functor_path_pregroupoid.
+    intros s.
+    exact ( (pr1 (pr1 UntypedForests.UntypedForest_ind (Down_Context ξ)))  (pr2 s)).
+  - intros ξ ξ' η.
+    apply nat_trans_functor_path_pregroupoid.
+    intros s.
+    (* On applique le T^u  à la transformation naturelle de ξ en ξ' *)
 
-Let σucoind : SigmaMonoid θUntypedForest := MultiSortedEmbeddingIndCoindHSET.σcoind  UntypedForests.sort  UntypedForests.Hsort  UntypedForests.UntypedForest_Sig.
 
-Definition UntypedForest_ind  : SortIndexing.sortToSet2 UntypedForests.sort UntypedForests.Hsort := UntypedForests.UntypedForest_gen σuind.
+Definition Carrier_detype : sortToSet2.
+Proof.
+  use make_functor.
+  -
 
-Definition Detype_Forest : sortToSet2 -> (SortIndexing.sortToSet2 UntypedForests.sort UntypedForests.Hsort).
-  intros t.
-  (* Que faire dès ici ? *)
 
+
+Definition Carrier_detype_date
 
 End Typing.
 
