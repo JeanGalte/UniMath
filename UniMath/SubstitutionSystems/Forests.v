@@ -409,37 +409,100 @@ Proof.
   exact (a,, s ).
 Defined.
 
-Definition Down_Context_on_mor  (ξ ξ' : sortToSet)  (η : sortToSet⟦ξ, ξ'⟧)  : UntypedForests.sortToSet⟦Down_Context ξ, Down_Context ξ'⟧.
+Definition Down_Context_on_mor  {ξ ξ' : sortToSet}  (η : sortToSet⟦ξ,
+ξ'⟧) : UntypedForests.sortToSet⟦Down_Context ξ, Down_Context ξ'⟧.
 Proof.
-  apply nat_trans_functor_path_pregroupoid.
-  intros s.
-  apply  CoproductOfArrows.
-  intro c.
-  simpl.
-  apply η.
+   apply nat_trans_functor_path_pregroupoid.
+   intros s.
+   use CoproductOfArrows.
+   intro c.
+   simpl.
+   apply η.
 Defined.
 
-Definition Carrier_detype_date : functor_data sortToSet sortToSet.
+Definition Carrier_detype_data : functor_data sortToSet sortToSet.
 Proof.
-  use make_functor_data.
-  - intros ξ.
-    apply functor_path_pregroupoid.
-    intros s.
-    exact ( (pr1 (pr1 UntypedForests.UntypedForest_ind (Down_Context ξ)))  (pr2 s)).
-  - intros ξ ξ' η.
-    apply nat_trans_functor_path_pregroupoid.
-    intros s.
-    (* On applique le T^u  à la transformation naturelle de ξ en ξ' *)
+   use make_functor_data.
+   - intros ξ.
+     apply functor_path_pregroupoid.
+     intros s.
+     exact (pr1 (pr1 UntypedForests.UntypedForest_ind (Down_Context ξ))
+(pr2 s)).
+   - intros ξ ξ' η.
+     apply nat_trans_functor_path_pregroupoid.
+     intros s.
+     change (pr1 (pr1 (pr1 UntypedForests.UntypedForest_ind
+(Down_Context ξ)) (pr2 s)) ->
+             pr1 (pr1 (pr1 UntypedForests.UntypedForest_ind
+(Down_Context ξ')) (pr2 s))).
+     set (aux := # (pr1 UntypedForests.UntypedForest_ind)
+(Down_Context_on_mor η)).
+     (* On applique le T^u  à la transformation naturelle de ξ en ξ' *)
+     exact (pr1 aux (pr2 s)).
+Defined.
 
-
-Definition Carrier_detype : sortToSet2.
+Lemma Carrier_detype_data_is_functor : is_functor Carrier_detype_data.
 Proof.
-  use make_functor.
-  -
+Admitted.
+
+Definition Carrier_detype : sortToSet2 := Carrier_detype_data ,,
+Carrier_detype_data_is_functor.
+
+Definition Detype_ind_alg_data : nat_trans_data (pr1
+(Forest_Functor_Id_H Carrier_detype)) (pr1 Carrier_detype).
+Proof.
+   intro ξ.
+   apply nat_trans_functor_path_pregroupoid.
+   intro s.
+   use BinCoproductArrow.
+   - change (SET⟦ pr1 ξ s, pr1 (pr1 Carrier_detype ξ) s ⟧).
+     intro x.
+     refine (pr1 (pr1 UntypedForests.UntypedForest_eta_ind _) _ _).
+     exists (pr1 s).
+     exact x.
+   - use CoproductArrow.
+     intro op.
+     change (SET⟦
+       pr1 (pr1
+(ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort
+         Hsort SET TerminalHSET BinProductsHSET BinCoproductsHSET
+CoproductsHSET
+         (arity sort Forest_Sig op) Carrier_detype) ξ) s,
+       pr1 (pr1 Carrier_detype ξ) s ⟧).
+     admit.
+Admitted.
+
+Lemma Detype_ind_alg_data_is_nat_trans : is_nat_trans _ _
+Detype_ind_alg_data.
+Proof.
+Admitted.
+
+Definition Detype_ind_alg : FunctorAlg Forest_Functor_Id_H.
+Proof.
+   use tpair.
+   - exact Carrier_detype.
+   - change (Forest_Functor_Id_H Carrier_detype --> Carrier_detype).
+     exact (Detype_ind_alg_data ,, Detype_ind_alg_data_is_nat_trans).
+Defined.
+
+Definition Detype_ind : Forest_ind --> Carrier_detype.
+Proof.
+   exact (pr1 (InitialArrow Forest_ind_IA Detype_ind_alg)).
+Defined.
 
 
-
-Definition Carrier_detype_date
+Definition Down_ops : ops _ Forest_Sig -> ops _
+UntypedForests.UntypedForest_Sig.
+Proof.
+   intro op.
+   induction op  as [term_construct | elim_construct].
+   + induction term_construct as [abs|sum].
+     * exact (inl (inl tt)).
+     * induction sum as [p n].
+       exact (inl (inr n)).
+   + induction elim_construct as [B p].
+     exact (inr (length B)).
+Defined.
 
 End Typing.
 
