@@ -40,6 +40,7 @@ Require Import UniMath.CategoryTheory.Categories.HSET.Colimits.
 Require Import UniMath.CategoryTheory.Categories.HSET.Limits.
 Require Import UniMath.CategoryTheory.Categories.HSET.Structures.
 Require Import UniMath.CategoryTheory.Categories.HSET.Univalence.
+Require Import UniMath.CategoryTheory.Core.Isos.
 Require Import UniMath.SubstitutionSystems.SigmaMonoids.
 Require UniMath.SubstitutionSystems.SortIndexing.
 Require Import UniMath.SubstitutionSystems.MultiSortedBindingSig.
@@ -69,6 +70,8 @@ Local Definition  Hsort : isofhlevel 3 sort.
 Proof.
 exact (isofhlevelssnset 1 sort (setproperty (stnset 3))).
 Qed.
+
+Local Definition Hsort' : isofhlevel 2 sort := (setproperty (stnset 3)).
 
 (* variables sort *)
 Definition sv : sort := make_stn 3 0 (idpath true : 0 < 3).
@@ -136,6 +139,8 @@ Local Definition θUntypedForest := MultiSortedMonadConstruction_actegorical.Mul
 
 Definition ctx_ext (ξ : sortToSet) (s : sort) : sortToSet
   := sorted_option_functorSet s ξ.
+
+Definition ctx_equiv (ξ ξ' : sortToSet) : UU :=  ∏ s : sort, (z_iso ((pr1 ξ) s)  ((pr1 ξ') s)).
 
 (** the sigma-monoids for wellfounded and non-wellfounded syntax for UntypedForests *)
 Local Definition σind : SigmaMonoid θUntypedForest := MultiSortedEmbeddingIndCoindHSET.σind sort Hsort UntypedForest_Sig.

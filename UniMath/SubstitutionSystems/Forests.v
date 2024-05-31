@@ -10,10 +10,12 @@ and having functions as morphisms.
 
 
 Require Import UniMath.Foundations.PartD.
+Require Import UniMath.Foundations.PartA.
 Require Import UniMath.Foundations.PartB.
 Require Import UniMath.Foundations.Sets.
 
 Require Import UniMath.MoreFoundations.Tactics.
+Require Import UniMath.MoreFoundations.Notations.
 
 Require Import UniMath.Combinatorics.Lists.
 Require Import UniMath.Combinatorics.StandardFiniteSets.
@@ -35,6 +37,7 @@ Require Import UniMath.CategoryTheory.Limits.Coproducts.
 Require Import UniMath.CategoryTheory.Limits.BinProducts.
 Require Import UniMath.CategoryTheory.Chains.Chains.
 Require Import UniMath.CategoryTheory.Chains.Cochains.
+Require Import UniMath.CategoryTheory.Core.Isos.
 Require Import UniMath.CategoryTheory.Categories.HSET.Core.
 Require Import UniMath.CategoryTheory.Categories.HSET.Colimits.
 Require Import UniMath.CategoryTheory.Categories.HSET.Limits.
@@ -87,6 +90,12 @@ Local Definition Hotype : isofhlevel 3 otype := MultiSortedBindingSig.STLC_Hsort
 Local Definition Hsyntcat : isofhlevel 3 syntcat := isofhlevelssnset 1 syntcat (setproperty (stnset 3)).
 
 Local Definition Hsort : isofhlevel 3 sort := isofhleveldirprod 3 otype syntcat Hotype Hsyntcat.
+
+Local Definition Hotype' : isofhlevel 2 otype := pr2 otype .
+
+Local Definition Hsyntcat' : isofhlevel 2 syntcat := (setproperty (stnset 3)).
+
+Local Definition Hsort' : isofhlevel 2 sort :=  isofhleveldirprod 2 otype syntcat Hotype' Hsyntcat'.
 
 Let sortToSet : category := SortIndexing.sortToSet sort Hsort.
 Let sortToSetSet : category := SortIndexing.sortToSetSet sort Hsort.
@@ -170,6 +179,8 @@ Let θForest := MultiSortedMonadConstruction_actegorical.MultiSortedSigToStrengt
 
 Definition ctx_ext (ξ : sortToSet) (s : sort) : sortToSet
   := sorted_option_functorSet s ξ.
+
+Definition ctx_equiv (ξ ξ' : sortToSet) : UU :=  ∏ s : sort, (z_iso ((pr1 ξ) s)  ((pr1 ξ') s)).
 
 (** the sigma-monoids for wellfounded and non-wellfounded syntax for Forests *)
 Let σind : SigmaMonoid θForest := MultiSortedEmbeddingIndCoindHSET.σind sort Hsort Forest_Sig.
@@ -399,6 +410,7 @@ Definition Forest_coind_FC : Terminal (CoAlg_category Forest_Functor_Id_H)
 Section Typing.
 
 
+(*Transforme un contexte en un contexte sans types *)
 Definition Down_Context (ξ : sortToSet)  : UntypedForests.sortToSet.
 Proof.
   apply functor_path_pregroupoid.
@@ -409,6 +421,7 @@ Proof.
   exact (a,, s ).
 Defined.
 
+(* Montre que le changement de contexte est homogène *)
 Definition Down_Context_on_mor  {ξ ξ' : sortToSet}  (η : sortToSet⟦ξ,
 ξ'⟧) : UntypedForests.sortToSet⟦Down_Context ξ, Down_Context ξ'⟧.
 Proof.
@@ -420,7 +433,106 @@ Proof.
    apply η.
 Defined.
 
-Definition Carrier_detype_data : functor_data sortToSet sortToSet.
+Let option_fun_summand2 := option_fun_summand sort Hsort HSET TerminalHSET CoproductsHSET.
+
+Let option_fun_summand2_u := option_fun_summand UntypedForests.sort UntypedForests.Hsort HSET TerminalHSET CoproductsHSET.
+
+
+Definition Down_works_option_fun_summand ( s : sort) :
+  UntypedForests.ctx_equiv
+    (Down_Context (option_fun_summand2 s))
+    (option_fun_summand2_u (pr2 s)).
+Proof.
+  red.
+  intros s0.
+  use make_z_iso.
+  - unfold Down_Context.
+    unfold functor_path_pregroupoid.
+    simpl.
+    intro x.
+    destruct x as [a [p q]].
+    rewrite <- p.
+    use tpair.
+      + apply idpath.
+      + exact q.
+  - simpl.
+    intro x.
+    destruct x as [p q].
+    exists (pr1 s).
+    rewrite  p.
+    use tpair.
+      + apply idpath.
+      + exact q.
+  - split ; simpl.
+    + apply funextfun.
+      intro x.
+      destruct x as [a [p q]].
+      cbn.
+      use total2_paths_f.
+      * simpl.
+        rewrite <- p.
+        apply idpath.
+      * use total2_paths_f.
+        -- apply Hsort'.
+        -- apply isapropunit.
+    + apply funextfun.
+      intro x.
+      destruct x as [p q].
+      cbn.
+      use total2_paths_f.
+      * apply (setproperty (stnset 3)).
+      * apply isapropunit.
+Defined.
+(*Rendre opaque la partie preuve *)
+
+
+Lemma Down_works_with_ext (ξ : sortToSet) ( s : sort) :
+  UntypedForests.ctx_equiv
+    (Down_Context (ctx_ext ξ s))
+    (UntypedForests.ctx_ext (Down_Context ξ) (pr2 s)).
+Proof.
+  red.
+  intros s0.
+  use make_z_iso.
+  - intro x.
+    destruct x as [a x'].
+    simpl in x'.
+    destruct x' as [option | base].
+    + apply ii1.
+      exact (pr1 ( Down_works_option_fun_summand s s0 ) (a ,, option)).
+    + apply ii2.
+      simpl.
+      exists a.
+      exact base.
+  - intro x.
+    destruct x as [option | base].
+    + simpl in option.
+      simpl.
+      exists (pr1 s).
+      apply ii1.
+      set (auxarg := pr1 (pr1 (option_fun_summand2_u (pr2 s)) s0)).
+    simpl in auxarg.
+    set (aux := pr12 (Down_works_option_fun_summand s s0) option).
+    simpl in aux.
+    destruct aux as [a [p q]].
+    use tpair.
+      * rewrite <- p. simpl. apply idpath.
+      * exact q.
+    + simpl in base.
+      destruct base as [a  t].
+      simpl.
+      exists a.
+      apply ii2.
+      exact t.
+  - split.
+    + admit.
+    + admit.
+Admitted.
+
+(*
+On veut créer un foncteur entre les sortToSet
+*)
+Definition Carrier_detype_data_ind : functor_data sortToSet sortToSet.
 Proof.
    use make_functor_data.
    - intros ξ.
@@ -441,21 +553,21 @@ Proof.
      exact (pr1 aux (pr2 s)).
 Defined.
 
-Lemma Carrier_detype_data_is_functor : is_functor Carrier_detype_data.
+Lemma Carrier_detype_data_ind_is_functor : is_functor Carrier_detype_data_ind.
 Proof.
 Admitted.
 
-Definition Carrier_detype : sortToSet2 := Carrier_detype_data ,,
-Carrier_detype_data_is_functor.
+Definition Carrier_detype_ind : sortToSet2 := Carrier_detype_data_ind ,,
+Carrier_detype_data_ind_is_functor.
 
 Definition Detype_ind_alg_data : nat_trans_data (pr1
-(Forest_Functor_Id_H Carrier_detype)) (pr1 Carrier_detype).
+(Forest_Functor_Id_H Carrier_detype_ind)) (pr1 Carrier_detype_ind).
 Proof.
    intro ξ.
    apply nat_trans_functor_path_pregroupoid.
    intro s.
    use BinCoproductArrow.
-   - change (SET⟦ pr1 ξ s, pr1 (pr1 Carrier_detype ξ) s ⟧).
+   - change (SET⟦ pr1 ξ s, pr1 (pr1 Carrier_detype_ind ξ) s ⟧).
      intro x.
      refine (pr1 (pr1 UntypedForests.UntypedForest_eta_ind _) _ _).
      exists (pr1 s).
@@ -467,8 +579,8 @@ Proof.
 (ContinuityOfMultiSortedSigToFunctor.hat_exp_functor_list'_optimized sort
          Hsort SET TerminalHSET BinProductsHSET BinCoproductsHSET
 CoproductsHSET
-         (arity sort Forest_Sig op) Carrier_detype) ξ) s,
-       pr1 (pr1 Carrier_detype ξ) s ⟧).
+         (arity sort Forest_Sig op) Carrier_detype_ind) ξ) s,
+       pr1 (pr1 Carrier_detype_ind ξ) s ⟧).
      admit.
 Admitted.
 
@@ -480,12 +592,12 @@ Admitted.
 Definition Detype_ind_alg : FunctorAlg Forest_Functor_Id_H.
 Proof.
    use tpair.
-   - exact Carrier_detype.
-   - change (Forest_Functor_Id_H Carrier_detype --> Carrier_detype).
+   - exact Carrier_detype_ind.
+   - change (Forest_Functor_Id_H Carrier_detype_ind --> Carrier_detype_ind).
      exact (Detype_ind_alg_data ,, Detype_ind_alg_data_is_nat_trans).
 Defined.
 
-Definition Detype_ind : Forest_ind --> Carrier_detype.
+Definition Detype_ind : Forest_ind --> Carrier_detype_ind.
 Proof.
    exact (pr1 (InitialArrow Forest_ind_IA Detype_ind_alg)).
 Defined.
@@ -503,6 +615,37 @@ Proof.
    + induction elim_construct as [B p].
      exact (inr (length B)).
 Defined.
+
+Definition Carrier_detype_data_coind : functor_data sortToSet sortToSet.
+Proof.
+   use make_functor_data.
+   - intros ξ.
+     apply functor_path_pregroupoid.
+     intros s.
+     exact (pr1 (pr1 UntypedForests.UntypedForest_coind (Down_Context ξ))
+(pr2 s)).
+   - intros ξ ξ' η.
+     apply nat_trans_functor_path_pregroupoid.
+     intros s.
+     change (pr1 (pr1 (pr1 UntypedForests.UntypedForest_coind
+(Down_Context ξ)) (pr2 s)) ->
+             pr1 (pr1 (pr1 UntypedForests.UntypedForest_coind
+(Down_Context ξ')) (pr2 s))).
+     set (aux := # (pr1 UntypedForests.UntypedForest_coind)
+(Down_Context_on_mor η)).
+     exact (pr1 aux (pr2 s)).
+Defined.
+
+Lemma Carrier_detype_data_coind_is_functor : is_functor Carrier_detype_data_coind.
+Proof.
+Admitted.
+
+Definition Carrier_detype_coind : sortToSet2 := Carrier_detype_data_ind ,,
+Carrier_detype_data_ind_is_functor.
+
+Definition Detype_coind_dat : Carrier_detype_ind --> UntypedForests.UntypedForest_coind.
+
+Definition Carrier_detype_coind (ξ : UntypedForests.sortToSet) (s : UntypedForests.sort) : UntypedForests.
 
 End Typing.
 
