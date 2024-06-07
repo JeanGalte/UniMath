@@ -67,10 +67,9 @@ Local Notation "[]" := (@nil _) (at level 0, format "[]").
 Local Notation "a + b" := (setcoprod a b) : set.
 Local Notation "'Id'" := (functor_identity _).
 
-Context (atom : hSet) (otype : hSet) (atotype : atom -> otype) (arr : otype → otype → otype) (plus : nat -> atom -> atom).
+Context (atom : hSet) (otype : hSet) (atotype : atom -> otype) (arr : otype → otype → otype).
 
 Local Notation "s ⇒ t" := (arr s t).
-Local Notation "0" := (plus nil).
 
 (** same as "sorts" for the untyped calculus, which are syntactic categories. See UntypedForests.v *)
 Definition syntcat : UU := stn 3.
@@ -355,7 +354,7 @@ Section Church_int.
         exact body.
       Defined.
 
-    Definition Church_gen (n : nat) (ξ  : sortToSet) : Forest_gen_ctx_sort ξ (((a' ⇒ a') ⇒ (a' ⇒ a')) ,,st ) := Church_gen_header ξ (Church_gen_body n ξ).
+    Definition Church_gen (n : nat) (ξ  : sortToSet) : Forest_gen_ctx_sort ξ (( (a' ⇒ a') ⇒ (a' ⇒ a')) ,,st ) := Church_gen_header ξ (Church_gen_body n ξ).
 
 
 End Church_int.
@@ -463,7 +462,7 @@ Proof.
     use tpair.
       + apply idpath.
       + exact q.
-  - split ; simpl.
+  - split.
     + apply funextfun.
       intro x.
       destruct x as [a [p q]].
@@ -525,7 +524,10 @@ Proof.
       apply ii2.
       exact t.
   - split.
-    + admit.
+    + cbn.
+      apply funextfun.
+
+      admit.
     + admit.
 Admitted.
 
