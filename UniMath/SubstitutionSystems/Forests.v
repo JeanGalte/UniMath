@@ -15,6 +15,7 @@ Require Import UniMath.Foundations.PartB.
 Require Import UniMath.Foundations.Sets.
 
 Require Import UniMath.MoreFoundations.Tactics.
+Require Import UniMath.MoreFoundations.PartA.
 Require Import UniMath.MoreFoundations.Notations.
 
 Require Import UniMath.Combinatorics.Lists.
@@ -408,6 +409,10 @@ Definition Forest_coind_FC : Terminal (CoAlg_category Forest_Functor_Id_H)
 
 Section Typing.
 
+Context (cl : UntypedForests.sort -> syntcat).
+
+Coercion cl :  UntypedForests.sort >-> syntcat.
+
 
 (*Transforme un contexte en un contexte sans types *)
 Definition Down_Context (ξ : sortToSet)  : UntypedForests.sortToSet.
@@ -485,6 +490,27 @@ Defined.
 (*Rendre opaque la partie preuve *)
 
 
+(* Lemme moche *)
+
+
+(*
+Lemma L1 (ξ : sortToSet) (s : sort) (ot : otype) (s0 : UntypedForests.sort) (f1 :  constant_functor [path_pregroupoid sort Hsort, SET] [path_pregroupoid sort Hsort, SET] (option_fun_summand sort Hsort SET TerminalHSET CoproductsHSET s) ξ (ot,, s0) ) : (λ x : pr1 (UntypedForests.ctx_ext (Down_Context ξ) (pr2 s)) s0,
+      match x with
+      | inl a =>
+          pr1 s,,
+          inl
+            (let auxarg := pr1 (pr1 (option_fun_summand2_u (pr2 s)) s0) in
+             let aux := (pr12 (Down_works_option_fun_summand s s0)) a in
+             internal_paths_rew sort (pr1 aux,, s0) (λ s1 : sort, pr1 s1,, s0 = s1) (idpath (pr1 aux,, s0)) s (pr12 aux),, pr22 aux)
+      | inr b => pr1 b,, inr (pr2 b)
+      end) (ot,, inl f1) = pr1 s,,
+          inl
+            (let auxarg := pr1 (pr1 (option_fun_summand2_u (pr2 s)) s0) in
+             let aux := (pr12 (Down_works_option_fun_summand s s0)) a in
+             internal_paths_rew sort (pr1 aux,, s0) (λ s1 : sort, pr1 s1,, s0 = s1) (idpath (pr1 aux,, s0)) s (pr12 aux),, pr22 aux).
+
+  *)
+
 Lemma Down_works_with_ext (ξ : sortToSet) ( s : sort) :
   UntypedForests.ctx_equiv
     (Down_Context (ctx_ext ξ s))
@@ -524,9 +550,22 @@ Proof.
       apply ii2.
       exact t.
   - split.
-    + cbn.
-      apply funextfun.
-
+    + apply funextfun.
+      intro y.
+      destruct y as [ot b].
+      destruct b as [f1 | f2].
+      * destruct f1 as [p q].
+        use total2_paths_f.
+        -- cbn.
+           rewrite <- p.
+           apply idpath.
+        -- simpl. admit.
+      * admit.
+  + apply funextfun.
+    intro x.
+    destruct x as [p | q].
+    cbn.
+    *
       admit.
     + admit.
 Admitted.
