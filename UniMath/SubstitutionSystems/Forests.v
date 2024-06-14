@@ -441,213 +441,154 @@ Let option_fun_summand2 := option_fun_summand sort Hsort HSET TerminalHSET Copro
 
 Let option_fun_summand2_u := option_fun_summand UntypedForests.sort UntypedForests.Hsort HSET TerminalHSET CoproductsHSET.
 
-(*
-Lemma proof_part (s0 : UntypedForests.sort) (s : sort) :
-    is_inverse_in_precat
-    ((((λ x : ∑ (i : otype) (_ : i,, s0 = s), unit,
-        (λ (a : otype) (pr2 : ∑ _ : a,, s0 = s, unit),
-         (λ (p : a,, s0 = s) (q : unit),
-          internal_paths_rew sort (a,, s0) (λ s1 : sort, ∑ _ : s0 = Preamble.pr2 s1, unit) (idpath (Preamble.pr2 (a,, s0)),, q) s p)
-           (pr1 pr2) (Preamble.pr2 pr2)) (pr1 x) (pr2 x))
-       :
-       SET
-       ⟦ pr1
-           (make_functor
-              (make_functor_data
-                 (λ s1 : UntypedForests.sort, CoproductsHSET otype (pr2 otype) (λ a : otype, (pr11 (option_fun_summand2 s)) (a,, s1)))
-                 (λ (a b : path_pregroupoid UntypedForests.sort UntypedForests.Hsort)
-                  (aeqb : path_pregroupoid UntypedForests.sort UntypedForests.Hsort ⟦ a, b ⟧),
-                  transportf
-                    (λ z : SET, SET ⟦ CoproductsHSET otype (pr2 otype) (λ a0 : otype, (pr11 (option_fun_summand2 s)) (a0,, a)), z ⟧)
-                    (maponpaths
-                       (λ s1 : UntypedForests.sort,
-                        CoproductsHSET otype (pr2 otype) (λ a0 : otype, (pr11 (option_fun_summand2 s)) (a0,, s1))) aeqb)
-                    (identity (CoproductsHSET otype (pr2 otype) (λ a0 : otype, (pr11 (option_fun_summand2 s)) (a0,, a))))))
-              ((λ a : path_pregroupoid UntypedForests.sort UntypedForests.Hsort,
-                idpath
-                  (identity
-                     (make_functor_data
-                        (λ s1 : UntypedForests.sort,
-                         CoproductsHSET otype (pr2 otype) (λ a0 : otype, (pr11 (option_fun_summand2 s)) (a0,, s1)))
-                        (λ (a0 b : path_pregroupoid UntypedForests.sort UntypedForests.Hsort)
-                         (aeqb : path_pregroupoid UntypedForests.sort UntypedForests.Hsort ⟦ a0, b ⟧),
-                         transportf
-                           (λ z : SET,
-                            SET ⟦ CoproductsHSET otype (pr2 otype) (λ a1 : otype, (pr11 (option_fun_summand2 s)) (a1,, a0)), z ⟧)
-                           (maponpaths
-                              (λ s1 : UntypedForests.sort,
-                               CoproductsHSET otype (pr2 otype) (λ a1 : otype, (pr11 (option_fun_summand2 s)) (a1,, s1))) aeqb)
-                           (identity (CoproductsHSET otype (pr2 otype) (λ a1 : otype, (pr11 (option_fun_summand2 s)) (a1,, a0))))) a))),,
-               (λ (a b c : path_pregroupoid UntypedForests.sort UntypedForests.Hsort)
-                (g : path_pregroupoid UntypedForests.sort UntypedForests.Hsort ⟦ a, b ⟧)
-                (h : path_pregroupoid UntypedForests.sort UntypedForests.Hsort ⟦ b, c ⟧),
-                maponpaths
-                  (λ p : CoproductsHSET otype (pr2 otype) (λ a0 : otype, (pr11 (option_fun_summand2 s)) (a0,, a)) =
-                         CoproductsHSET otype (pr2 otype) (λ a0 : otype, (pr11 (option_fun_summand2 s)) (a0,, c)),
-                   transportf
-                     (precategory_morphisms (CoproductsHSET otype (pr2 otype) (λ a0 : otype, (pr11 (option_fun_summand2 s)) (a0,, a)))) p
-                     (identity (CoproductsHSET otype (pr2 otype) (λ a0 : otype, (pr11 (option_fun_summand2 s)) (a0,, a)))))
-                  (maponpathscomp0
-                     (λ s1 : UntypedForests.sort,
-                      CoproductsHSET otype (pr2 otype) (λ a0 : otype, (pr11 (option_fun_summand2 s)) (a0,, s1))) g h) @
-                ! transport_f_f
-                    (precategory_morphisms (CoproductsHSET otype (pr2 otype) (λ a0 : otype, (pr11 (option_fun_summand2 s)) (a0,, a))))
-                    (maponpaths
-                       (λ s1 : UntypedForests.sort,
-                        CoproductsHSET otype (pr2 otype) (λ a0 : otype, (pr11 (option_fun_summand2 s)) (a0,, s1))) g)
-                    (maponpaths
-                       (λ s1 : UntypedForests.sort,
-                        CoproductsHSET otype (pr2 otype) (λ a0 : otype, (pr11 (option_fun_summand2 s)) (a0,, s1))) h)
-                    (identity (CoproductsHSET otype (pr2 otype) (λ a0 : otype, (pr11 (option_fun_summand2 s)) (a0,, a)))) @
-                functor_path_pregroupoid_subproof UntypedForests.sort SET UntypedForests.Hsort
-                  (λ s1 : UntypedForests.sort, CoproductsHSET otype (pr2 otype) (λ a0 : otype, (pr11 (option_fun_summand2 s)) (a0,, s1)))
-                  a b c g h))) s0, pr1 (option_fun_summand2_u (pr2 s)) s0 ⟧)
-      :
-      SET
-      ⟦ pr1
-          (functor_path_pregroupoid UntypedForests.Hsort
-             (λ s1 : UntypedForests.sort, CoproductsHSET otype (pr2 otype) (λ a : otype, (pr11 (option_fun_summand2 s)) (a,, s1)))) s0,
-      pr1 (option_fun_summand2_u (pr2 s)) s0 ⟧)
-     :
-     SET ⟦ pr1 (Down_Context (option_fun_summand2 s)) s0, pr1 (option_fun_summand2_u (pr2 s)) s0 ⟧)
-    ((λ x : ∑ _ : s0 = pr2 s, unit,
-      (λ (p : s0 = pr2 s) (q : unit),
-       pr1 s,,
-       internal_paths_rew_r UntypedForests.sort s0 (pr2 s) (λ s1 : UntypedForests.sort, ∑ _ : pr1 s,, s1 = s, unit) (idpath s,, q) p)
-        (pr1 x) (pr2 x))
-     :
-     SET ⟦ pr1 (option_fun_summand2_u (pr2 s)) s0, pr1 (Down_Context (option_fun_summand2 s)) s0 ⟧).
-*)
+Definition Down_works_option_fun_summand_to (s : sort) (s0 :
+UntypedForests.sort) :
+   SET ⟦ pr1 (Down_Context (option_fun_summand2 s)) s0, pr1
+(option_fun_summand2_u (pr2 s)) s0 ⟧.
+Proof.
+   unfold Down_Context.
+   unfold functor_path_pregroupoid.
+   simpl.
+   intro x.
+   destruct x as [a [p q]].
+   rewrite <- p.
+   use tpair.
+   - apply idpath.
+   - exact q.
+Defined.
+
+Definition Down_works_option_fun_summand_from (s : sort) (s0 :
+UntypedForests.sort) :
+   SET ⟦ pr1 (option_fun_summand2_u (pr2 s)) s0, pr1 (Down_Context
+(option_fun_summand2 s)) s0 ⟧.
+Proof.
+   simpl.
+   intro x.
+   destruct x as [p q].
+   exists (pr1 s).
+   rewrite  p.
+   use tpair.
+   - apply idpath.
+   - exact q.
+Defined.
+
+Lemma Down_works_option_fun_summand_aux (s : sort) (s0 :
+UntypedForests.sort) :
+   is_inverse_in_precat (Down_works_option_fun_summand_to s s0)
+(Down_works_option_fun_summand_from s s0).
+Proof.
+   split.
+   - apply funextfun.
+     intro x.
+     destruct x as [a [p q]].
+     cbn.
+     use total2_paths_f.
+     + simpl.
+       rewrite <- p.
+       apply idpath.
+     + use total2_paths_f.
+       * apply Hsort'.
+       * apply isapropunit.
+   - apply funextfun.
+     intro x.
+     destruct x as [p q].
+     cbn.
+     use total2_paths_f.
+     + apply (setproperty (stnset 3)).
+     + apply isapropunit.
+Qed.
 
 
 Definition Down_works_option_fun_summand (s : sort) :
-  UntypedForests.ctx_equiv
-    (Down_Context (option_fun_summand2 s))
-    (option_fun_summand2_u (pr2 s)).
+   UntypedForests.ctx_equiv
+     (Down_Context (option_fun_summand2 s))
+     (option_fun_summand2_u (pr2 s)).
 Proof.
-  red.
-  intros s0.
-  use make_z_iso.
-  - unfold Down_Context.
-    unfold functor_path_pregroupoid.
-    simpl.
-    intro x.
-    destruct x as [a [p q]].
-    rewrite <- p.
-    use tpair.
-      + apply idpath.
-      + exact q.
-  - simpl.
-    intro x.
-    destruct x as [p q].
-    exists (pr1 s).
-    rewrite  p.
-    use tpair.
-      + apply idpath.
-      + exact q.
-  - (*Partie à rendre opaque *)
-    split.
-    + apply funextfun.
-      intro x.
-      destruct x as [a [p q]].
-      cbn.
-      use total2_paths_f.
-      * simpl.
-        rewrite <- p.
-        apply idpath.
-      * use total2_paths_f.
-        -- apply Hsort'.
-        -- apply isapropunit.
-    + apply funextfun.
-      intro x.
-      destruct x as [p q].
-      cbn.
-      use total2_paths_f.
-      * apply (setproperty (stnset 3)).
-      * apply isapropunit.
+   red.
+   intros s0.
+   use make_z_iso.
+   - apply Down_works_option_fun_summand_to.
+   - apply Down_works_option_fun_summand_from.
+   - apply Down_works_option_fun_summand_aux.
 Defined.
-(*Rendre opaque la partie preuve *)
 
+Definition Down_works_with_ext_to (ξ : sortToSet) (s : sort) (s0 :
+UntypedForests.sort) :
+   SET ⟦ pr1 (Down_Context (ctx_ext ξ s)) s0, pr1
+(UntypedForests.ctx_ext (Down_Context ξ) (pr2 s)) s0 ⟧.
+Proof.
+   intro x.
+   destruct x as [a x'].
+   simpl in x'.
+   destruct x' as [option | base].
+   - apply ii1.
+     exact (pr1 ( Down_works_option_fun_summand s s0 ) (a ,, option)).
+   - apply ii2.
+     simpl.
+     exists a.
+     exact base.
+Defined.
 
-(* Lemme moche *)
-
-
-(*
-Lemma L1 (ξ : sortToSet) (s : sort) (ot : otype) (s0 : UntypedForests.sort) (f1 :  constant_functor [path_pregroupoid sort Hsort, SET] [path_pregroupoid sort Hsort, SET] (option_fun_summand sort Hsort SET TerminalHSET CoproductsHSET s) ξ (ot,, s0) ) : (λ x : pr1 (UntypedForests.ctx_ext (Down_Context ξ) (pr2 s)) s0,
-      match x with
-      | inl a =>
-          pr1 s,,
-          inl
-            (let auxarg := pr1 (pr1 (option_fun_summand2_u (pr2 s)) s0) in
-             let aux := (pr12 (Down_works_option_fun_summand s s0)) a in
-             internal_paths_rew sort (pr1 aux,, s0) (λ s1 : sort, pr1 s1,, s0 = s1) (idpath (pr1 aux,, s0)) s (pr12 aux),, pr22 aux)
-      | inr b => pr1 b,, inr (pr2 b)
-      end) (ot,, inl f1) = pr1 s,,
-          inl
-            (let auxarg := pr1 (pr1 (option_fun_summand2_u (pr2 s)) s0) in
-             let aux := (pr12 (Down_works_option_fun_summand s s0)) a in
-             internal_paths_rew sort (pr1 aux,, s0) (λ s1 : sort, pr1 s1,, s0 = s1) (idpath (pr1 aux,, s0)) s (pr12 aux),, pr22 aux).
-
-  *)
+Definition Down_works_with_ext_from (ξ : sortToSet) (s : sort) (s0 :
+UntypedForests.sort) :
+   SET ⟦ pr1 (UntypedForests.ctx_ext (Down_Context ξ) (pr2 s)) s0, pr1
+(Down_Context (ctx_ext ξ s)) s0 ⟧.
+Proof.
+   intro x.
+   destruct x as [option | base].
+   - simpl in option.
+     simpl.
+     exists (pr1 s).
+     apply ii1.
+     set (auxarg := pr1 (pr1 (option_fun_summand2_u (pr2 s)) s0)).
+     simpl in auxarg.
+     set (aux := pr12 (Down_works_option_fun_summand s s0) option).
+     simpl in aux.
+     destruct aux as [a [p q]].
+     use tpair.
+     + rewrite <- p. simpl. apply idpath.
+     + exact q.
+   - simpl in base.
+     destruct base as [a  t].
+     simpl.
+     exists a.
+     apply ii2.
+     exact t.
+Defined.
 
 Lemma Down_works_with_ext (ξ : sortToSet) ( s : sort) :
-  UntypedForests.ctx_equiv
-    (Down_Context (ctx_ext ξ s))
-    (UntypedForests.ctx_ext (Down_Context ξ) (pr2 s)).
+   UntypedForests.ctx_equiv
+     (Down_Context (ctx_ext ξ s))
+     (UntypedForests.ctx_ext (Down_Context ξ) (pr2 s)).
 Proof.
-  red.
-  intros s0.
-  use make_z_iso.
-  - intro x.
-    destruct x as [a x'].
-    simpl in x'.
-    destruct x' as [option | base].
-    + apply ii1.
-      exact (pr1 ( Down_works_option_fun_summand s s0 ) (a ,, option)).
-    + apply ii2.
-      simpl.
-      exists a.
-      exact base.
-  - intro x.
-    destruct x as [option | base].
-    + simpl in option.
-      simpl.
-      exists (pr1 s).
-      apply ii1.
-      set (auxarg := pr1 (pr1 (option_fun_summand2_u (pr2 s)) s0)).
-    simpl in auxarg.
-    set (aux := pr12 (Down_works_option_fun_summand s s0) option).
-    simpl in aux.
-    destruct aux as [a [p q]].
-    use tpair.
-      * rewrite <- p. simpl. apply idpath.
-      * exact q.
-    + simpl in base.
-      destruct base as [a  t].
-      simpl.
-      exists a.
-      apply ii2.
-      exact t.
-  - split.
-    + apply funextfun.
-      intro y.
-      destruct y as [ot b].
-      destruct b as [f1 | f2].
-      * destruct f1 as [p q].
-        use total2_paths_f.
-        -- cbn.
-           rewrite <- p.
-           apply idpath.
-        -- simpl. admit.
-      * admit.
-  + apply funextfun.
-    intro x.
-    destruct x as [p | q].
-    cbn.
-    *
-      admit.
-    + admit.
+   red.
+   intros s0.
+   use make_z_iso.
+   - apply Down_works_with_ext_to.
+   - apply Down_works_with_ext_from.
+   - split.
+     + apply funextfun.
+       intro y.
+       simpl.
+       destruct y as [ot b].
+       destruct b as [f1 | f2].
+       * destruct f1 as [p q].
+         use total2_paths_f.
+         -- cbn.
+            apply (maponpaths pr1) in p.
+            exact (!p).
+         -- induction p.
+            apply idpath.
+       * cbn. apply idpath.
+   + apply funextfun.
+     intro x.
+     destruct x as [p | q] ; cbn.
+     * apply maponpaths.
+       use total2_paths_f.
+       -- apply UntypedForests.Hsort'.
+     * apply idpath.
 Admitted.
+
 
 (*
 On veut créer un foncteur entre les sortToSet
