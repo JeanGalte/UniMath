@@ -437,6 +437,36 @@ Proof.
    apply η.
 Defined.
 
+Definition Down_context_functor_data : functor_data sortToSet UntypedForests.sortToSet.
+Proof.
+ use make_functor_data.
+ - apply Down_Context.
+ - intros a b f;
+   apply Down_Context_on_mor.
+   exact f.
+Defined.
+
+Lemma is_functor_down_context : is_functor Down_context_functor_data.
+Proof.
+  split ; red.
+  - intro ξ.
+    apply nat_trans_eq.
+    { apply has_homsets_HSET. }
+    intro x.
+    apply funextfun.
+    intro elem.
+    apply idpath.
+  - intros a b c f g.
+    apply nat_trans_eq.
+    { apply has_homsets_HSET. }
+    intro x.
+    apply funextfun.
+    intro elem.
+    apply idpath.
+Qed.
+
+Definition Down_Context_functor : functor sortToSet UntypedForests.sortToSet := (Down_context_functor_data ,, is_functor_down_context).
+
 Let option_fun_summand2 := option_fun_summand sort Hsort HSET TerminalHSET CoproductsHSET.
 
 Let option_fun_summand2_u := option_fun_summand UntypedForests.sort UntypedForests.Hsort HSET TerminalHSET CoproductsHSET.
@@ -630,7 +660,12 @@ split ; red.
   unfold make_nat_trans.
   unfold nat_trans_data_from_nat_trans_funclass.
   unfold pr1. unfold  pr2.
-  admit.
+
+  (* Problème dans l'inférence de type ? *)
+  change (Down_Context_on_mor (identity ξ)) with (# Down_Context_functor (identity ξ)).
+  rewrite (functor_id).
+  rewrite (functor_id  UntypedForests.UntypedForest_ind).
+  apply idpath.
   - intros ξ1 ξ2 ξ3 f g.
     apply nat_trans_eq.
     exact has_homsets_HSET.
@@ -644,8 +679,11 @@ split ; red.
     unfold make_nat_trans.
     unfold nat_trans_data_from_nat_trans_funclass.
     unfold pr1. unfold pr2.
-    admit.
-Admitted.
+    change (Down_Context_on_mor (f · g)) with (# Down_Context_functor (f · g)).
+    rewrite functor_comp.
+    rewrite (functor_comp UntypedForests.UntypedForest_ind).
+    apply idpath.
+Qed.
 
 Definition Carrier_detype_ind : sortToSet2 := Carrier_detype_data_ind ,,
 Carrier_detype_data_ind_is_functor.
