@@ -585,10 +585,10 @@ Proof.
      destruct x as [p | q] ; cbn.
      * apply maponpaths.
        use total2_paths_f.
-       -- apply UntypedForests.Hsort'.
+       -- apply ((setproperty (stnset 3))) .
+       -- apply isProofIrrelevantUnit.
      * apply idpath.
-Admitted.
-
+Defined.
 
 (*
 On veut créer un foncteur entre les sortToSet
@@ -616,6 +616,35 @@ Defined.
 
 Lemma Carrier_detype_data_ind_is_functor : is_functor Carrier_detype_data_ind.
 Proof.
+split ; red.
+- intro ξ.
+  apply nat_trans_eq.
+  exact has_homsets_HSET.
+  intro x.
+  apply funextfun.
+  intro elem.
+  unfold functor_on_morphisms.
+  unfold Carrier_detype_data_ind.
+  unfold make_functor_data.
+  unfold nat_trans_functor_path_pregroupoid.
+  unfold make_nat_trans.
+  unfold nat_trans_data_from_nat_trans_funclass.
+  unfold pr1. unfold  pr2.
+  admit.
+  - intros ξ1 ξ2 ξ3 f g.
+    apply nat_trans_eq.
+    exact has_homsets_HSET.
+    intro x.
+    apply funextfun.
+    intro elem.
+    unfold functor_on_morphisms.
+    unfold Carrier_detype_data_ind.
+    unfold make_functor_data.
+    unfold nat_trans_functor_path_pregroupoid.
+    unfold make_nat_trans.
+    unfold nat_trans_data_from_nat_trans_funclass.
+    unfold pr1. unfold pr2.
+    admit.
 Admitted.
 
 Definition Carrier_detype_ind : sortToSet2 := Carrier_detype_data_ind ,,
@@ -663,7 +692,6 @@ Proof.
    exact (pr1 (InitialArrow Forest_ind_IA Detype_ind_alg)).
 Defined.
 
-
 Definition Down_ops : ops _ Forest_Sig -> ops _
 UntypedForests.UntypedForest_Sig.
 Proof.
@@ -699,14 +727,39 @@ Defined.
 
 Lemma Carrier_detype_data_coind_is_functor : is_functor Carrier_detype_data_coind.
 Proof.
+  split ; red.
+- intro ξ.
+  apply nat_trans_eq.
+  exact has_homsets_HSET.
+  intro x.
+  apply funextfun.
+  intro elem.
+  unfold functor_on_morphisms.
+  unfold Carrier_detype_data_coind.
+  unfold make_functor_data.
+  unfold nat_trans_functor_path_pregroupoid.
+  unfold make_nat_trans.
+  unfold nat_trans_data_from_nat_trans_funclass.
+  unfold pr1. unfold  pr2.
+  admit.
+  - intros ξ1 ξ2 ξ3 f g.
+    apply nat_trans_eq.
+    exact has_homsets_HSET.
+    intro x.
+    apply funextfun.
+    intro elem.
+    unfold functor_on_morphisms.
+    unfold Carrier_detype_data_coind.
+    unfold make_functor_data.
+    unfold nat_trans_functor_path_pregroupoid.
+    unfold make_nat_trans.
+    unfold nat_trans_data_from_nat_trans_funclass.
+    unfold pr1. unfold pr2.
+    admit.
 Admitted.
 
 Definition Carrier_detype_coind : sortToSet2 := Carrier_detype_data_ind ,,
 Carrier_detype_data_ind_is_functor.
-
-Definition Detype_coind_dat : Carrier_detype_ind --> UntypedForests.UntypedForest_coind.
-
-Definition Carrier_detype_coind (ξ : UntypedForests.sortToSet) (s : UntypedForests.sort) : UntypedForests.
 
 End Typing.
 
