@@ -415,7 +415,7 @@ Coercion cl :  UntypedForests.sort >-> syntcat.
 
 
 (*Transforme un contexte en un contexte sans types *)
-Definition Down_Context (ξ : sortToSet)  : UntypedForests.sortToSet.
+Definition Down_Context (ξ : sortToSet) : UntypedForests.sortToSet.
 Proof.
   apply functor_path_pregroupoid.
   intro s.
@@ -615,7 +615,7 @@ Proof.
      destruct x as [p | q] ; cbn.
      * apply maponpaths.
        use total2_paths_f.
-       -- apply ((setproperty (stnset 3))) .
+       -- apply UntypedForests.Hsort'.
        -- apply isProofIrrelevantUnit.
      * apply idpath.
 Defined.
@@ -660,8 +660,6 @@ split ; red.
   unfold make_nat_trans.
   unfold nat_trans_data_from_nat_trans_funclass.
   unfold pr1. unfold  pr2.
-
-  (* Problème dans l'inférence de type ? *)
   change (Down_Context_on_mor (identity ξ)) with (# Down_Context_functor (identity ξ)).
   rewrite (functor_id).
   rewrite (functor_id  UntypedForests.UntypedForest_ind).
@@ -779,7 +777,10 @@ Proof.
   unfold make_nat_trans.
   unfold nat_trans_data_from_nat_trans_funclass.
   unfold pr1. unfold  pr2.
-  admit.
+  change (Down_Context_on_mor (identity ξ)) with (# Down_Context_functor (identity ξ)).
+  rewrite (functor_id).
+  rewrite (functor_id UntypedForests.UntypedForest_coind).
+  apply idpath.
   - intros ξ1 ξ2 ξ3 f g.
     apply nat_trans_eq.
     exact has_homsets_HSET.
@@ -793,8 +794,11 @@ Proof.
     unfold make_nat_trans.
     unfold nat_trans_data_from_nat_trans_funclass.
     unfold pr1. unfold pr2.
-    admit.
-Admitted.
+    change (Down_Context_on_mor (f · g)) with (# Down_Context_functor (f · g)).
+    rewrite functor_comp.
+    rewrite (functor_comp UntypedForests.UntypedForest_coind).
+    apply idpath.
+Qed.
 
 Definition Carrier_detype_coind : sortToSet2 := Carrier_detype_data_ind ,,
 Carrier_detype_data_ind_is_functor.
